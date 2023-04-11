@@ -1,38 +1,37 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.9;
 
 import "./Voting.sol";
+import "./TokenWeightedVoting.sol";
 
-interface IVotingFactory{
-
+interface IVotingFactory {
     function getIsIdentified(address _owner) external returns (bool);
 
     function getIsKYC(address _owner) external returns (bool);
-    
-    function getIsModerator(address _owner) external  returns (bool);
+
+    function getIsModerator(address _owner) external returns (bool);
 }
 
 /**
-* VotingFactory is a factory to create Votings
-* Allows user to update their basic info
-*/
+ * VotingFactory is a factory to create Votings
+ * Allows user to update their basic info
+ */
 contract VotingFactory {
-    
-    /** 
-    * Addresses array of created votings
-    */
-    address[] private deployedVotings;
-
-    
     /**
-    * if KYC = false it's not authorizated user;
-    * if KYC = true it's authorizated user;
-    *
-    * if roleWeight = 0 it's user; 
-    * if roleWeight = 1 it's moderator; 
-    * if roleWeight = 2 it's admin;
-    */
+     * Addresses array of created votings
+     */
+    address[] private deployedVotings;
+    address[] private deployedTokenWeightedVotings;
+
+    /**
+     * if KYC = false it's not authorizated user;
+     * if KYC = true it's authorizated user;
+     *
+     * if roleWeight = 0 it's user;
+     * if roleWeight = 1 it's moderator;
+     * if roleWeight = 2 it's admin;
+     */
     struct Identity {
         string name;
         string email;
@@ -42,52 +41,67 @@ contract VotingFactory {
         address owner;
     }
 
-    mapping (address => Identity) private identities;
+    mapping(address => Identity) private identities;
 
     /**
-    * Mapping to have a copy of Votings
-    */
-    mapping (address => Voting) private votings;
+     * Mapping to have a copy of Votings
+     */
+    mapping(address => Voting) private votings;
 
     /**
-    * Moderators modifier
-    * Moderators can add/remove users to/from KYC
-    */
-    modifier isModerator(){
+     * Mapping to have a copy of Token-Weighted Votings
+     */
+    mapping(address => TokenWeightedVoting) private tokenWeightedVotings;
+
+    /**
+     * Moderators modifier
+     * Moderators can add/remove users to/from KYC
+     */
+    modifier isModerator() {
         require(identities[msg.sender].roleWeight > 0, "Not a Moderator!");
         _;
     }
 
     /**
-    * Admin modifier
-    * Admin can add/remove moderators and users to/from KYC
-    */
-    modifier isAdmin(){
+     * Admin modifier
+     * Admin can add/remove moderators and users to/from KYC
+     */
+    modifier isAdmin() {
         require(identities[msg.sender].roleWeight == 2, "Not an Admin!");
         _;
     }
 
     /**
-    * Identification modifier
-    * Requires basic information about the user (name, email, age)
-    * Indentified user can vote and create votings
-    */
-    modifier isIdentified(address _owner){
+     * Identification modifier
+     * Requires basic information about the user (name, email, age)
+     * Indentified user can vote and create votings
+     */
+    modifier isIdentified(address _owner) {
         require(identities[_owner].owner != address(0), "Identity not found");
         _;
     }
 
-    event VotingsDeployed(string indexed _title, address indexed _chairPerson, address _votingAddress);
+    event VotingsDeployed(
+        string indexed _title,
+        address indexed _chairPerson,
+        address _votingAddress
+    );
+
+    event TokenWeightedVotingDeployed(
+        string indexed _title,
+        address _votingAddress
+    );
 
     /**
-    * Contructor creates admin
-    * Contract creator creates profile with Admin role
-    * Adds it to KYC
-    */
+     * Contructor creates admin
+     * Contract creator creates profile with Admin role
+     * Adds it to KYC
+     */
     constructor(
-    string memory adminName, 
-    string memory adminEmail, 
-    uint adminAge){
+        string memory adminName,
+        string memory adminEmail,
+        uint adminAge
+    ) {
         createIdentity(adminName, adminEmail, adminAge);
 
         identities[msg.sender].KYC = true;
@@ -95,22 +109,29 @@ contract VotingFactory {
     }
 
     /**
-    * Function for creating voting
-    * Requires KYC for only KYC'd users voting
-    * Voting time from 1 minute to 1 month
-    */
-    function createVoting(string memory title, 
-    string[] memory proposalNames,
-    uint durationMinutes, 
-    uint quorom,
-    bool isKYC) 
-    public isIdentified(msg.sender)
-    returns (address) {
-        if(identities[msg.sender].KYC == false && isKYC == true){
-            revert("Only KYC'ed users can create KYC votings");
+     * Function for creating voting
+     * Requires KYC for only KYC'd users voting
+     * Voting time from 1 hour to 1 month
+     */
+    function createVoting(
+        string memory title,
+        string[] memory proposalNames,
+        uint durationMinutes,
+        uint quorom,
+        bool isKYC
+    ) public isIdentified(msg.sender) returns (address) {
+        if (identities[msg.sender].KYC == false && isKYC == true) {
+            revert("Only for KYC'ed users");
         }
 
-        Voting newVoting = new Voting(title, proposalNames, durationMinutes, msg.sender, quorom, isKYC);
+        Voting newVoting = new Voting(
+            title,
+            proposalNames,
+            durationMinutes,
+            msg.sender,
+            quorom,
+            isKYC
+        );
 
         address newVotingAddress = address(newVoting);
         deployedVotings.push(newVotingAddress);
@@ -122,32 +143,80 @@ contract VotingFactory {
     }
 
     /**
-    * Identity creator, registration
-    * Allows user to create their info
-    * (name, email, age)
-    * GP-13
-    */
+     * Function for creating token-weighted voting
+     * Requires moderator or admin
+     * Voting time from 1 hour to 1 month
+     * Creates NFT colletcion
+     * requiers token address
+     * At the end of the voting users can get nft
+     */
+    function createTokenWeightedVoting(
+        string memory title,
+        string[] memory proposalNames,
+        uint durationMinutes,
+        address tokenAddress,
+        string memory nftName,
+        string memory nftSymbol,
+        string memory baseURI
+    ) public isModerator returns (address) {
+        TokenWeightedVoting newVoting = new TokenWeightedVoting(
+            title,
+            proposalNames,
+            durationMinutes,
+            tokenAddress,
+            nftName,
+            nftSymbol,
+            baseURI
+        );
+
+        address newVotingAddress = address(newVoting);
+        deployedTokenWeightedVotings.push(newVotingAddress);
+        tokenWeightedVotings[newVotingAddress] = newVoting;
+
+        emit TokenWeightedVotingDeployed(title, newVotingAddress);
+
+        return newVotingAddress;
+    }
+
+    /**
+     * Identity creator, registration
+     * Allows user to create their info
+     * (name, email, age)
+     * GP-13
+     */
     function createIdentity(
-    string memory _name, 
-    string memory _email, 
-    uint _age) public {
-        require(identities[msg.sender].owner == address(0), "Identity already exists");
+        string memory _name,
+        string memory _email,
+        uint _age
+    ) public {
+        require(
+            identities[msg.sender].owner == address(0),
+            "Identity already exists"
+        );
         require(_age >= 13, "PG-13");
 
-        Identity memory newIdentity = Identity(_name, _email, _age, false, 0, msg.sender);
+        Identity memory newIdentity = Identity(
+            _name,
+            _email,
+            _age,
+            false,
+            0,
+            msg.sender
+        );
         identities[msg.sender] = newIdentity;
     }
 
     /**
-    * Identity updater
-    * Allows user to change their info
-    * (name, email, age)
-    * GP-13
-    */
+     * Identity updater
+     * Allows user to change their info
+     * (name, email, age)
+     * GP-13
+     */
     function updateIdentity(
-    string memory _name, 
-    string memory _email, 
-    uint _age) public isIdentified(msg.sender) {
+        string memory _name,
+        string memory _email,
+        uint _age
+    ) public isIdentified(msg.sender) {
         require(_age >= 13, "PG-13");
 
         Identity storage identity = identities[msg.sender];
@@ -156,39 +225,54 @@ contract VotingFactory {
         identity.email = _email;
         identity.age = _age;
     }
-    
+
     /**
-    * Getter, return addresses array of created votings
-    */
+     * Getter, return addresses array of created votings
+     */
     function getDeployedVotings() public view returns (address[] memory) {
         return deployedVotings;
     }
 
     /**
-    * Getter, returns user's identification info 
-    * (name, email, age, KYC, roleWeight)
-    */
-    function getIdentityInfo(address _owner) 
-    public view 
-    isIdentified(_owner) 
-    returns (
-        string memory, 
-        string memory, 
-        uint, 
-        bool,
-        uint)  {
+     * Getter, return addresses array of created votings
+     */
+    function getDeployedTokenWeightedVotings()
+        public
+        view
+        returns (address[] memory)
+    {
+        return deployedTokenWeightedVotings;
+    }
+
+    /**
+     * Getter, returns user's identification info
+     * (name, email, age, KYC, roleWeight)
+     */
+    function getIdentityInfo(
+        address _owner
+    )
+        public
+        view
+        isIdentified(_owner)
+        returns (string memory, string memory, uint, bool, uint)
+    {
         Identity memory identity = identities[_owner];
 
-        return (identity.name, identity.email, identity.age, identity.KYC, identity.roleWeight);
+        return (
+            identity.name,
+            identity.email,
+            identity.age,
+            identity.KYC,
+            identity.roleWeight
+        );
     }
-    
+
     /**
-    * Getter, returns true/false of identification
-    * If user created profile (registered) return true, else false
-    */
-    function getIsIdentified(address _owner) 
-    public view returns (bool) {
-        if(identities[_owner].owner != address(0)) {
+     * Getter, returns true/false of identification
+     * If user created profile (registered) return true, else false
+     */
+    function getIsIdentified(address _owner) public view returns (bool) {
+        if (identities[_owner].owner != address(0)) {
             return true;
         } else {
             return false;
@@ -196,12 +280,11 @@ contract VotingFactory {
     }
 
     /**
-    * Getter, returns true/false of authorization
-    * If user authorizated return true, else false
-    */
-    function getIsKYC(address _owner)
-    public view returns (bool) {
-        if(identities[_owner].KYC == true) {
+     * Getter, returns true/false of authorization
+     * If user authorizated return true, else false
+     */
+    function getIsKYC(address _owner) public view returns (bool) {
+        if (identities[_owner].KYC == true) {
             return true;
         } else {
             return false;
@@ -209,55 +292,67 @@ contract VotingFactory {
     }
 
     /**
-    * Getter, returns true/false of moderation
-    * If user is moderator return true, else false
-    */
-    function getIsModerator(address _owner)
-    public view returns (bool) {
-        if(identities[_owner].roleWeight > 0) {
+     * Getter, returns true/false of moderation
+     * If user is moderator return true, else false
+     */
+    function getIsModerator(address _owner) public view returns (bool) {
+        if (identities[_owner].roleWeight > 0) {
             return true;
         } else {
             return false;
         }
     }
-    
+
     /**
-    * Getter, returns winner of voting session
-    */
-    function getVotiongWinnerName(address votingAddress) public view returns (string memory) {
+     * Getter, returns winner of voting session
+     */
+    function getVotiongWinnerName(
+        address votingAddress
+    ) public view returns (string memory) {
         Voting voting = votings[votingAddress];
 
         return voting.getWinnerName();
     }
-    
+
     /**
-    * Only moderators and admin can add to KYC
-    * Adding adding to KYC requires user's identification
-    */
-    function addToKYC(address user) public isModerator isIdentified(user){
+     * Getter, returns winner of voting session
+     */
+    function getTokenWeightedVotingWinnerName(
+        address votingAddress
+    ) public view returns (string memory) {
+        TokenWeightedVoting voting = tokenWeightedVotings[votingAddress];
+
+        return voting.getWinnerName();
+    }
+
+    /**
+     * Only moderators and admin can add to KYC
+     * Adding adding to KYC requires user's identification
+     */
+    function addToKYC(address user) public isModerator isIdentified(user) {
         identities[user].KYC = true;
     }
 
     /**
-    * Only moderators and admin can remove from KYC
-    */
-    function removeFromKYC(address user) public isModerator{
+     * Only moderators and admin can remove from KYC
+     */
+    function removeFromKYC(address user) public isModerator {
         identities[user].KYC = false;
     }
 
     /**
-    * Only admin can add moderators
-    * Adding moderator requires user's identification
-    */
-    function addModerator(address user) public isAdmin isIdentified(user){
+     * Only admin can add moderators
+     * Adding moderator requires user's identification
+     */
+    function addModerator(address user) public isAdmin isIdentified(user) {
         require(identities[user].roleWeight < 1, "Already has role");
         identities[user].roleWeight = 1;
     }
 
     /**
-    * Only admin can remove moderators
-    */
-    function removeModerator(address user) public isAdmin{
+     * Only admin can remove moderators
+     */
+    function removeModerator(address user) public isAdmin {
         require(identities[user].roleWeight != 2, "Admin can't be deleted");
         identities[user].roleWeight = 0;
     }
