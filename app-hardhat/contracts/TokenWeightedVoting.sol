@@ -2,12 +2,12 @@
 
 pragma solidity ^0.8.9;
 
-import "./VotingFactory.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "contracts/IVotingFactory.sol";
 
-interface Token {
+interface IToken {
     function transfer(
         address recipient,
         uint256 amount
@@ -28,13 +28,11 @@ interface Token {
 contract TokenWeightedVoting is ERC721Enumerable, Ownable, ReentrancyGuard {
     using Strings for uint256;
 
-    Token solyankaToken;
-
     uint public endTime;
-    address public votingFactoryAddress;
     string public title;
     string private baseURI;
 
+    IToken private solyankaToken;
     IVotingFactory private votingFactory;
     Proposal[] private proposals;
 
@@ -89,7 +87,7 @@ contract TokenWeightedVoting is ERC721Enumerable, Ownable, ReentrancyGuard {
         string memory __baseURI
     ) ERC721(nftName, nftSymbol) {
         require(
-            _tokenAddress != address(0),
+            address(_tokenAddress) != address(0),
             "Token Address cannot be address 0"
         );
         require(
@@ -102,14 +100,13 @@ contract TokenWeightedVoting is ERC721Enumerable, Ownable, ReentrancyGuard {
             "Duration from 1 hour to 1 month"
         );
 
-        solyankaToken = Token(_tokenAddress);
+        solyankaToken = IToken(_tokenAddress);
         title = _title;
         baseURI = __baseURI;
 
         endTime = block.timestamp + _durationMinutes * 1 minutes;
 
-        votingFactoryAddress = msg.sender;
-        votingFactory = IVotingFactory(votingFactoryAddress);
+        votingFactory = IVotingFactory(msg.sender);
 
         for (uint i = 0; i < _proposalNames.length; i++) {
             require(isNotBlank(_proposalNames[i]), "Empty proposal string");

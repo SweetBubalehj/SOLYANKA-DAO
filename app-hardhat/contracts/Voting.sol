@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.9;
 
-import "./VotingFactory.sol";
+import "contracts/IVotingFactory.sol";
 
 /**
  * Voting is a session to vote for proposals
@@ -12,7 +12,6 @@ contract Voting {
     uint public endTime;
     uint public quorum;
     address public chairPerson;
-    address public votingFactoryAddress;
     string public title;
 
     IVotingFactory private votingFactory;
@@ -92,8 +91,7 @@ contract Voting {
 
         endTime = block.timestamp + _durationMinutes * 1 minutes;
 
-        votingFactoryAddress = msg.sender;
-        votingFactory = IVotingFactory(votingFactoryAddress);
+        votingFactory = IVotingFactory(msg.sender);
 
         for (uint i = 0; i < _proposalNames.length; i++) {
             require(isNotBlank(_proposalNames[i]), "Empty proposal string");

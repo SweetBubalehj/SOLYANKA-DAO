@@ -5,14 +5,6 @@ pragma solidity ^0.8.9;
 import "./Voting.sol";
 import "./TokenWeightedVoting.sol";
 
-interface IVotingFactory {
-    function getIsIdentified(address _owner) external returns (bool);
-
-    function getIsKYC(address _owner) external returns (bool);
-
-    function getIsModerator(address _owner) external returns (bool);
-}
-
 /**
  * VotingFactory is a factory to create Votings
  * Allows user to update their basic info
