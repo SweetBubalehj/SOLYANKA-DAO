@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.18;
 
 import "./Voting.sol";
 import "./TokenWeightedVoting.sol";
@@ -146,19 +146,13 @@ contract VotingFactory {
         string memory title,
         string[] memory proposalNames,
         uint durationMinutes,
-        address tokenAddress,
-        string memory nftName,
-        string memory nftSymbol,
-        string memory baseURI
+        address tokenAddress
     ) public isModerator returns (address) {
         TokenWeightedVoting newVoting = new TokenWeightedVoting(
             title,
             proposalNames,
             durationMinutes,
-            tokenAddress,
-            nftName,
-            nftSymbol,
-            baseURI
+            tokenAddress
         );
 
         address newVotingAddress = address(newVoting);

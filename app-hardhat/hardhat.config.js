@@ -18,24 +18,24 @@ module.exports = {
     testnet: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545",
       chainId: 97,
-      gasPrice: 20000000000,
       accounts: [process.env.PRIVATE_KEY],
     },
     mainnet: {
       url: "https://bsc-dataseed.binance.org/",
       chainId: 56,
-      gasPrice: 20000000000,
       accounts: [process.env.PRIVATE_KEY],
     },
   },
   solidity: {
-    version: "0.8.9",
+    version: "0.8.18",
     settings: {
       optimizer: {
         enabled: true,
-        runs: 1000,
       },
     },
+  },
+  gasReporter: {
+    enabled: true,
   },
   paths: {
     sources: "./contracts",
@@ -46,7 +46,7 @@ module.exports = {
   etherscan: {
     // Your API key for Etherscan
     // Obtain one at https://bscscan.com/
-    apiKey: [process.env.API_KEY],
+    apiKey: process.env.API_KEY,
   },
   mocha: {
     timeout: 20000,

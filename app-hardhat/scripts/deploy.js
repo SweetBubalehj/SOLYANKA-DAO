@@ -7,17 +7,36 @@
 const hre = require("hardhat");
 
 async function main() {
-  const constructorArgs = ["Bubaleh", "...@gmail.com", 21];
+  const constructorArguments = ["Bubaleh", "...@gmail.com", 21];
   const VotingFactory = await hre.ethers.getContractFactory("VotingFactory");
-  const contarct = await VotingFactory.deploy(
-    constructorArgs[0],
-    constructorArgs[1],
-    constructorArgs[2]
+  const contract = await VotingFactory.deploy(
+    constructorArguments[0],
+    constructorArguments[1],
+    constructorArguments[2]
   );
 
-  await contarct.deployed();
+  await contract.deployed();
 
   console.log(`Contract deployed to ${contarct.address}`);
+  if (network.config.chainId === 97) {
+    contract.deployTransaction.wait(15);
+    verify(contarct.address, [constructorArguments]);
+  }
+}
+
+async function verify(contractAddress, arguments) {
+  try {
+    await run("verify:verify", {
+      address: contractAddress,
+      constructorArguments: [arguments],
+    });
+  } catch (e) {
+    if (e.message.toLowerCase.includes("already verified")) {
+      console.log("The contract already verified.");
+    } else {
+      console.log(e);
+    }
+  }
 }
 
 // We recommend this pattern to be able to use async/await everywhere

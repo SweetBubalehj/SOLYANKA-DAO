@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.18;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "contracts/IVotingFactory.sol";
 
 interface IToken {
@@ -25,12 +23,9 @@ interface IToken {
 /**
  * Voting is a session to vote for proposals
  */
-contract TokenWeightedVoting is ERC721Enumerable, Ownable, ReentrancyGuard {
-    using Strings for uint256;
-
+contract TokenWeightedVoting is ReentrancyGuard {
     uint public endTime;
     string public title;
-    string private baseURI;
 
     IToken private solyankaToken;
     IVotingFactory private votingFactory;
@@ -81,19 +76,13 @@ contract TokenWeightedVoting is ERC721Enumerable, Ownable, ReentrancyGuard {
         string memory _title,
         string[] memory _proposalNames,
         uint _durationMinutes,
-        address _tokenAddress,
-        string memory nftName,
-        string memory nftSymbol,
-        string memory __baseURI
-    ) ERC721(nftName, nftSymbol) {
+        address _tokenAddress
+    ) {
         require(
             address(_tokenAddress) != address(0),
             "Token Address cannot be address 0"
         );
-        require(
-            isNotBlank(_title) && isNotBlank(nftName) && isNotBlank(nftSymbol),
-            "Empty string"
-        );
+        require(isNotBlank(_title), "Empty string");
         require(_proposalNames.length >= 2, "At least 2 proposals");
         require(
             _durationMinutes >= 60 && _durationMinutes <= 43800,
@@ -101,8 +90,6 @@ contract TokenWeightedVoting is ERC721Enumerable, Ownable, ReentrancyGuard {
         );
 
         solyankaToken = IToken(_tokenAddress);
-        title = _title;
-        baseURI = __baseURI;
 
         endTime = block.timestamp + _durationMinutes * 1 minutes;
 
@@ -113,27 +100,6 @@ contract TokenWeightedVoting is ERC721Enumerable, Ownable, ReentrancyGuard {
 
             proposals.push(Proposal({name: _proposalNames[i], voteCount: 0}));
         }
-    }
-
-    function _baseURI() internal view override returns (string memory) {
-        return baseURI;
-    }
-
-    function tokenURI(
-        uint256 tokenId
-    ) public view override returns (string memory) {
-        _requireMinted(tokenId);
-        return
-            bytes(_baseURI()).length > 0
-                ? string(
-                    abi.encodePacked(_baseURI(), tokenId.toString(), ".json")
-                )
-                : "";
-    }
-
-    function changeBaseURI(string memory _newBaseURI) public {
-        require(votingFactory.getIsModerator(msg.sender), "Not a moderator");
-        baseURI = _newBaseURI;
     }
 
     /**
@@ -197,7 +163,6 @@ contract TokenWeightedVoting is ERC721Enumerable, Ownable, ReentrancyGuard {
 
         _user.claimed = true;
         solyankaToken.transfer(msg.sender, totalTokens);
-        _safeMint(msg.sender, totalSupply());
 
         return true;
     }
