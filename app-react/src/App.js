@@ -13,6 +13,7 @@ import { configureChains, createClient } from "wagmi";
 import { GlobalOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import "./App.css";
+import IdentityInfoForm from "./components/IdentityInfo";
 
 const { Header, Content } = Layout;
 const { Title, Paragraph } = Typography;
@@ -41,7 +42,49 @@ const wagmiClient = createClient({
 });
 
 const App = () => {
-  const [showWelcome, setShowWelcome] = useState(true);
+  const [contentKey, setContentKey] = useState("welcome");
+
+  const renderContent = () => {
+    switch (contentKey) {
+      case "welcome":
+        return (
+          <div style={{ textAlign: "center" }}>
+            <Title level={1}>Welcome to SOLYANKA DAO</Title>
+            <Paragraph>
+              This is the home page of SOLYANKA DAO. Click on the "Votings" menu
+              item to access the main features. Click "Profile" to go to your
+              profile.
+            </Paragraph>
+          </div>
+        );
+      case "votings":
+        return (
+          <>
+            <WagmiConfig client={wagmiClient}>
+              <CreateVotingForm />
+            </WagmiConfig>
+
+            <WagmiConfig client={wagmiClient}>
+              <CreateIdentityForm />
+            </WagmiConfig>
+
+            <WagmiConfig client={wagmiClient}>
+              <VotingList />
+            </WagmiConfig>
+          </>
+        );
+      case "profile":
+        return (
+          <div style={{ textAlign: "center" }}>
+            <WagmiConfig client={wagmiClient}>
+              <IdentityInfoForm />
+            </WagmiConfig>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <Layout>
@@ -60,10 +103,11 @@ const App = () => {
               defaultSelectedKeys={["welcome"]}
               theme="dark"
               mode="horizontal"
-              onClick={({ key }) => setShowWelcome(key === "welcome")}
+              onClick={({ key }) => setContentKey(key)}
             >
               <Menu.Item key="welcome">Welcome</Menu.Item>
               <Menu.Item key="votings">Votings</Menu.Item>
+              <Menu.Item key="profile">Profile</Menu.Item>
             </Menu>
           </Col>
           <Col>
@@ -83,29 +127,7 @@ const App = () => {
           minWidth: "750px",
         }}
       >
-        {showWelcome ? (
-          <div style={{ textAlign: "center" }}>
-            <Title level={1}>Welcome to SOLYANKA DAO</Title>
-            <Paragraph>
-              This is the home page of SOLYANKA DAO. Click on the "Votings" menu
-              item to access the main features.
-            </Paragraph>
-          </div>
-        ) : (
-          <>
-            <WagmiConfig client={wagmiClient}>
-              <CreateVotingForm />
-            </WagmiConfig>
-
-            <WagmiConfig client={wagmiClient}>
-              <CreateIdentityForm />
-            </WagmiConfig>
-
-            <WagmiConfig client={wagmiClient}>
-              <VotingList />
-            </WagmiConfig>
-          </>
-        )}
+        {renderContent()}
       </Content>
     </Layout>
   );
