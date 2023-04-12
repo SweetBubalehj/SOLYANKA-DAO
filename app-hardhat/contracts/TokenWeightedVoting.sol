@@ -80,7 +80,7 @@ contract TokenWeightedVoting is ReentrancyGuard {
     ) {
         require(
             address(_tokenAddress) != address(0),
-            "Token Address cannot be address 0"
+            "Token address(0)"
         );
         require(isNotBlank(_title), "Empty string");
         require(_proposalNames.length >= 2, "At least 2 proposals");
@@ -186,19 +186,6 @@ contract TokenWeightedVoting is ReentrancyGuard {
         require(isNotBlank(_title), "Empty title string");
 
         title = _title;
-    }
-
-    /**
-     * Function for adding voting time
-     * Requires chair person and voting time is not up
-     */
-    function addDurationTime(uint256 _durationMinutes) public votingNotEnded {
-        require(
-            _durationMinutes >= 1 && _durationMinutes <= 10080,
-            "Addition duration must be from 1 minute to 1 week"
-        );
-
-        endTime += _durationMinutes * 1 minutes;
     }
 
     /**

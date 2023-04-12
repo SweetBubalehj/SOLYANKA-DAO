@@ -110,7 +110,8 @@ contract VotingFactory {
         string[] memory proposalNames,
         uint durationMinutes,
         uint quorom,
-        bool isKYC
+        bool isKYC,
+        bool isPrivate
     ) public isIdentified(msg.sender) returns (address) {
         if (identities[msg.sender].KYC == false && isKYC == true) {
             revert("Only for KYC'ed users");
@@ -122,7 +123,8 @@ contract VotingFactory {
             durationMinutes,
             msg.sender,
             quorom,
-            isKYC
+            isKYC,
+            isPrivate
         );
 
         address newVotingAddress = address(newVoting);

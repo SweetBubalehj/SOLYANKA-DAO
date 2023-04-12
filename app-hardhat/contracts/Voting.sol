@@ -9,6 +9,7 @@ import "contracts/IVotingFactory.sol";
  */
 contract Voting {
     bool public isKYC;
+    bool public isPrivate;
     uint public endTime;
     uint public quorum;
     address public chairPerson;
@@ -30,6 +31,7 @@ contract Voting {
     event VoteReceived(address voter, uint proposal);
 
     mapping(address => Voter) public addressToVoter;
+    mapping(address => bool) public addressToWhitelist;
 
     /**
      * Moderators requiers chair person
@@ -60,6 +62,13 @@ contract Voting {
         _;
     }
 
+    modifier isWhitelisted(address _owner) {
+        if (isPrivate) {
+            require(addressToWhitelist[_owner], "Is not whitelisted!");
+        }
+        _;
+    }
+
     /**
      * Voting constructor
      * Creates voting with parametrs
@@ -73,7 +82,8 @@ contract Voting {
         uint _durationMinutes,
         address _chairPerson,
         uint _quorum,
-        bool _isKYC
+        bool _isKYC,
+        bool _isPrivate
     ) {
         require(isNotBlank(_title), "Empty title string");
         require(_proposalNames.length >= 2, "At least 2 proposals");
@@ -85,6 +95,7 @@ contract Voting {
         title = _title;
         quorum = _quorum;
         isKYC = _isKYC;
+        isPrivate = _isPrivate;
 
         chairPerson = _chairPerson;
         addressToVoter[chairPerson].voted = true;
@@ -135,6 +146,23 @@ contract Voting {
         proposals[proposal].voteCount += 1;
 
         emit VoteReceived(msg.sender, proposal);
+    }
+
+    function addToWhitelist(address[] memory _users) public onlyChairPerson {
+        require(isPrivate, "Not a private voting");
+
+        for (uint i = 0; i < _users.length; i++) {
+            require(_users[i] != address(0), "User address(0)");
+            addressToWhitelist[_users[i]] = true;
+        }
+    }
+
+    function removeFromWhitelist(address _user) public onlyChairPerson {
+        require(isPrivate, "Not a private voting");
+        require(_user != address(0), "User address(0)");
+        require(!addressToVoter[_user].voted, "Already voted");
+
+        addressToWhitelist[_user] = false;
     }
 
     /**
