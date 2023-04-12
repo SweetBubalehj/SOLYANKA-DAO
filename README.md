@@ -15,7 +15,7 @@ SOLYANKA DAO - это децентрализованное автономное 
 1. Клонируйте репозиторий:
 
 ```
-git clone https://github.com/SweetBubalehj/DAO-dapp.git
+git clone https://github.com/SweetBubalehj/SOLYANKA-DAO.git
 ```
 
 2. Установите зависимости для hardhat (для работы с контрактом):
