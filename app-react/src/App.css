@@ -5,3 +5,22 @@
 .ant-menu-item:hover {
   background-color: rgba(255, 255, 255, 0.1) !important;
 }
+
+.check {
+  align-items: center;
+    background: #fcfcfd;
+    border: 2px solid #e8eaee;
+    border-radius: 50px;
+    box-sizing: border-box;
+    display: flex;
+    cursor: pointer;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-left: auto;
+    margin-right: auto;
+    min-height: 90px;
+    padding: 32px 15px;
+    position: relative;
+    transition: transform .15s;
+    width:30%;
+}
