@@ -24,10 +24,10 @@ import {
 } from "../contracts/factoryContract";
 import { ABI as votingABI } from "../contracts/votingContract";
 import { ethers } from "ethers";
-import useGetIsVerified from "../utils/isIdentified";
+import useCheckIdentity from "../utils/isIdentified";
 import { ClockCircleOutlined } from "@ant-design/icons";
 import VotingSettings from "./VotingSettings";
-import useGetIsKYC from "../utils/isKYC";
+import useCheckKYC from "../utils/isKYC";
 import useGetIsModerator from "../utils/isModerator";
 import VotingModeration from "./VotingModeration";
 
@@ -43,8 +43,8 @@ const VotingList = () => {
   const [kycStatuses, setKycStatuses] = useState([]);
 
   const provider = new ethers.providers.Web3Provider(window.ethereum);
-  const isUserVerified = useGetIsVerified();
-  const isUserKYC = useGetIsKYC();
+  const isUserVerified = useCheckIdentity();
+  const isUserKYC = useCheckKYC();
   const isUserModerator = useGetIsModerator();
   const { address: userAddress } = useAccount();
 
@@ -82,7 +82,7 @@ const VotingList = () => {
   const { data: voters } = useContractRead({
     address: data?.[selectedVoting],
     abi: votingABI,
-    functionName: "voters",
+    functionName: "addressToVoter",
     args: [userAddress],
   });
 

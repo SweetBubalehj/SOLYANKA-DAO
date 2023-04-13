@@ -44,53 +44,46 @@ const wagmiClient = createClient({
 const App = () => {
   const [contentKey, setContentKey] = useState("welcome");
 
-  const renderContent = () => {
-    switch (contentKey) {
-      case "welcome":
-        return (
-          <div style={{ textAlign: "center" }}>
-            <Title level={1}>Welcome to SOLYANKA DAO</Title>
-            <Paragraph>
-              This is the home page of SOLYANKA DAO. Click on the "Votings" menu
-              item to access the main features. Click "Profile" to go to your
-              profile.
-            </Paragraph>
-          </div>
-        );
-      case "votings":
-        return (
-          <>
-            <WagmiConfig client={wagmiClient}>
-              <CreateVotingForm />
-            </WagmiConfig>
+  const menuContent = {
+    welcome: (
+      <>
+        <Title level={1}>Welcome to SOLYANKA DAO</Title>
+        <Paragraph>
+          This is the home page of SOLYANKA DAO. Click on the "Votings" menu
+          item to access the main features. Click "Profile" to go to your
+          profile.
+        </Paragraph>
+      </>
+    ),
+    votings: (
+      <>
+        <WagmiConfig client={wagmiClient}>
+          <CreateVotingForm />
+        </WagmiConfig>
 
-            <WagmiConfig client={wagmiClient}>
-              <CreateIdentityForm />
-            </WagmiConfig>
+        <WagmiConfig client={wagmiClient}>
+          <CreateIdentityForm />
+        </WagmiConfig>
 
-            <WagmiConfig client={wagmiClient}>
-              <VotingList />
-            </WagmiConfig>
-          </>
-        );
-      case "profile":
-        return (
-          <div style={{ textAlign: "center" }}>
-            <WagmiConfig client={wagmiClient}>
-              <IdentityInfoForm />
-            </WagmiConfig>
-          </div>
-        );
-      default:
-        return null;
-    }
+        <WagmiConfig client={wagmiClient}>
+          <VotingList />
+        </WagmiConfig>
+      </>
+    ),
+    profile: (
+      <div style={{ textAlign: "center" }}>
+        <WagmiConfig client={wagmiClient}>
+          <IdentityInfoForm />
+        </WagmiConfig>
+      </div>
+    ),
   };
 
   return (
-    <Layout>
+    <Layout style={{ minWidth: "430px" }}>
       <Header>
         <Row justify="space-between" align="middle">
-          <Col style={{ display: "flex", alignItems: "center" }}>
+          <Col sm={{ span: 7, offset: 1 }} style={{ display: "flex", alignItems: "center" }}>
             <GlobalOutlined
               style={{ fontSize: "24px", color: "white", marginRight: "8px" }}
             />
@@ -98,7 +91,7 @@ const App = () => {
               SOLYANKA DAO
             </Title>
           </Col>
-          <Col>
+          <Col sm={6}>
             <Menu
               defaultSelectedKeys={["welcome"]}
               theme="dark"
@@ -110,7 +103,7 @@ const App = () => {
               <Menu.Item key="profile">Profile</Menu.Item>
             </Menu>
           </Col>
-          <Col>
+          <Col sm={5}>
             <WagmiConfig client={wagmiClient}>
               <RainbowKitProvider chains={chains}>
                 <ConnectButton />
@@ -123,11 +116,15 @@ const App = () => {
         style={{
           margin: "0 auto",
           padding: "50px",
-          width: "50%",
-          minWidth: "750px",
+          width: "100%",
+          maxWidth: "1500px"
         }}
       >
-        {renderContent()}
+        <Row justify="center" gutter={[16, 16]}>
+          <Col xs={24} sm={22} md={20} lg={18} xl={16}>
+            {menuContent[contentKey]}
+          </Col>
+        </Row>
       </Content>
     </Layout>
   );

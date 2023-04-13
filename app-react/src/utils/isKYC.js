@@ -1,17 +1,17 @@
 import { useContractRead, useAccount } from "wagmi";
 import { Address, ABI } from "../contracts/sbtContract";
 
-const useGetIsKYC = () => {
+const useCheckKYC = () => {
   const { address } = useAccount();
 
   const { data: KYCStatus } = useContractRead({
     address: Address,
     abi: ABI,
-    functionName: "getIsKYC",
+    functionName: "checkKYC",
     args: [address],
   });
 
   return KYCStatus;
 };
 
-export default useGetIsKYC;
+export default useCheckKYC;

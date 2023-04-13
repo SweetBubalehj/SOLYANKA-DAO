@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useContractWrite, usePrepareContractWrite } from "wagmi";
 import {
+  Row,
+  Col,
   Form,
   Input,
   Button,
-  InputNumber,
   Switch,
   Space,
   Spin,
@@ -14,14 +15,14 @@ import {
   notification,
 } from "antd";
 import { Address, ABI } from "../contracts/factoryContract";
-import useGetIsVerified from "../utils/isIdentified";
+import useCheckIdentity from "../utils/isIdentified";
 import {
   FormOutlined,
   UserOutlined,
   MinusCircleOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-import useGetIsKYC from "../utils/isKYC";
+import useCheckKYC from "../utils/isKYC";
 
 const { Option } = Select;
 const { Panel } = Collapse;
@@ -30,11 +31,11 @@ const CreateVotingForm = () => {
   const [title, setTitle] = useState("");
   const [proposalNames, setProposalNames] = useState([]);
   const [durationMinutes, setDurationMinutes] = useState(60);
-  const [quorom, setQuorom] = useState(0);
   const [isKYC, setIsKYC] = useState(false);
+  const [isPrivate, setIsPrivate] = useState(false);
 
-  const isUserKYC = useGetIsKYC();
-  const isVerified = useGetIsVerified();
+  const isUserKYC = useCheckKYC();
+  const isVerified = useCheckIdentity();
 
   const transactionIsSuccess = () => {
     notification.success({
@@ -43,28 +44,26 @@ const CreateVotingForm = () => {
     });
   };
 
-  const transactionIsLoading = () =>{
+  const transactionIsLoading = () => {
     notification.warning({
       message: "Check your wallet",
       placement: "bottomRight",
     });
-  }
+  };
 
   const { config } = usePrepareContractWrite({
     address: Address,
     abi: ABI,
     functionName: "createVoting",
-    args: [title, proposalNames, durationMinutes, quorom, isKYC],
+    args: [title, proposalNames, durationMinutes, isKYC, isPrivate],
   });
 
   const { isLoading, isSuccess, write } = useContractWrite(config);
 
   const durations = [
-    { label: "1 minute", value: 1 },
-    { label: "5 minutes", value: 5 },
-    { label: "10 minutes", value: 10 },
-    { label: "30 minutes", value: 30 },
     { label: "1 hour", value: 60 },
+    { label: "2 hours", value: 60 },
+    { label: "12 hours", value: 60 },
     { label: "1 day", value: 60 * 24 },
     { label: "1 week", value: 60 * 24 * 7 },
     { label: "1 month", value: 60 * 24 * 30 },
@@ -222,43 +221,42 @@ const CreateVotingForm = () => {
               )}
             </Form.List>
             <Form.Item>
-              <div
-                style={{
-                  textAlign: "center",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                <div style={{ marginRight: "10px" }}>Duration:</div>
-                <Select
-                  style={{ width: "110px", marginRight: "10px" }}
-                  defaultValue={durations[0].value}
-                  onChange={(value) =>
-                    setDurationMinutes(getDurationInMinutes(value))
-                  }
-                >
-                  {durations.map((duration) => (
-                    <Option key={duration.value} value={duration.value}>
-                      {duration.label}
-                    </Option>
-                  ))}
-                </Select>
-                <div style={{ marginRight: "10px" }}>Quorom:</div>
-                <InputNumber
-                  min={0}
-                  value={quorom}
-                  onChange={setQuorom}
-                  style={{ width: "110px", marginRight: "10px" }}
-                />
-                {isUserKYC && (
+              <Row justify="center" align="middle">
+                <Col xs={24} sm={8} md={12} style={{ textAlign: "center" }}>
+                  <>Duration: </>
+                  <Select
+                    style={{ width: "110px" }}
+                    defaultValue={durations[0].value}
+                    onChange={(value) =>
+                      setDurationMinutes(getDurationInMinutes(value))
+                    }
+                  >
+                    {durations.map((duration) => (
+                      <Option key={duration.value} value={duration.value}>
+                        {duration.label}
+                      </Option>
+                    ))}
+                  </Select>
+                </Col>
+                <Col xs={24} sm={8} md={6} style={{ textAlign: "center" }}>
                   <Switch
                     style={{ width: "80px", marginRight: "5px" }}
-                    checkedChildren="KYC ON"
-                    unCheckedChildren="KYC OFF"
-                    onChange={setIsKYC}
+                    checkedChildren="PRIVATE"
+                    unCheckedChildren="PUBLIC"
+                    onChange={setIsPrivate}
                   />
+                </Col>
+                {isUserKYC && (
+                  <Col xs={24} sm={8} md={6} style={{ textAlign: "center" }}>
+                    <Switch
+                      style={{ width: "80px", marginRight: "5px" }}
+                      checkedChildren="KYC ON"
+                      unCheckedChildren="KYC OFF"
+                      onChange={setIsKYC}
+                    />
+                  </Col>
                 )}
-              </div>
+              </Row>
             </Form.Item>
 
             <Form.Item>

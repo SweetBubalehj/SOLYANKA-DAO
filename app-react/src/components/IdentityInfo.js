@@ -23,7 +23,7 @@ const IdentityInfo = () => {
   const { config } = usePrepareContractWrite({
     address: Address,
     abi: ABI,
-    functionName: "updateIdentity",
+    functionName: "updateDataSoul",
     args: [newUserName, newEmail, newAge],
   });
 
@@ -32,7 +32,7 @@ const IdentityInfo = () => {
   const { data: identifyInfo } = useContractRead({
     address: Address,
     abi: ABI,
-    functionName: "getIdentityInfo",
+    functionName: "getSoul",
     args: [address],
   });
 
@@ -43,6 +43,7 @@ const IdentityInfo = () => {
   const [hasRights, setHasRigths] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  console.log(identifyInfo);
   useEffect(() => {
     if (identifyInfo && identifyInfo[0] != null) {
       setUserName(identifyInfo[0]);
@@ -129,10 +130,10 @@ const IdentityInfo = () => {
         </Button>
       )}
       {isAdmin && (
-        <button onClick={handleAdminButtonClick}>Admin button.</button>
+        <Button onClick={handleAdminButtonClick}>Admin button.</Button>
       )}
       {isModerator && (
-        <button onClick={handleModeratorButtonClick}>Moderator button.</button>
+        <Button onClick={handleModeratorButtonClick}>Moderator button.</Button>
       )}
       <Modal
         title="Edit profile"
@@ -161,11 +162,11 @@ const IdentityInfo = () => {
         </Form>
       </Modal>
       <Modal
-        title="Modarator button"
+        title="Edit profile" 
         open={isModalOpen}
         onOk={handleOk}
         onShow={showModal}
-        okButtonProps={{ disabled: !(userName && userEmail && userAge) }}
+        // okButtonProps={{ disabled: !(userName && userEmail && userAge) }} <-- инфо может быть пустой стринг
         onCancel={handleCancel}
       >
         <Form>

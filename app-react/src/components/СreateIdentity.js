@@ -1,8 +1,8 @@
 import { useContractWrite, usePrepareContractWrite } from "wagmi";
 import { Form, Input, Button, InputNumber, notification } from "antd";
-import { Address, ABI } from "../contracts/factoryContract";
+import { Address, ABI } from "../contracts/sbtContract";
 import { useState, useEffect } from "react";
-import useGetIsVerified from "../utils/isIdentified";
+import useCheckIdentity from "../utils/isIdentified";
 import { MailOutlined, UserOutlined } from "@ant-design/icons";
 
 function CreateIdentityForm() {
@@ -10,16 +10,16 @@ function CreateIdentityForm() {
   const [email, setEmail] = useState("");
   const [age, setAge] = useState(13);
 
-  const isVerified = useGetIsVerified();
+  const isVerified = useCheckIdentity();
 
   const { config } = usePrepareContractWrite({
     address: Address,
     abi: ABI,
-    functionName: "createIdentity",
+    functionName: "createSoul",
     args: [name, email, age],
   });
 
-  const { data, isLoading, isSuccess, write } = useContractWrite(config);
+  const { isLoading, isSuccess, write } = useContractWrite(config);
 
   const transactionIsSuccess = () => {
     notification.success({
@@ -28,12 +28,12 @@ function CreateIdentityForm() {
     });
   };
 
-  const transactionIsLoading = () =>{
+  const transactionIsLoading = () => {
     notification.warning({
       message: "Check your wallet",
       placement: "bottomRight",
     });
-  }
+  };
 
   useEffect(() => {
     if (isLoading) {

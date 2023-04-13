@@ -17,7 +17,6 @@ const { Panel } = Collapse;
 const VotingSettings = ({ votingAddress }) => {
   const [title, setTitle] = useState("");
   const [durationMinutes, setDurationMinutes] = useState(10);
-  const [quorom, setQuorom] = useState(0);
 
   const transactionIsSuccess = () => {
     notification.success({
@@ -45,18 +44,6 @@ const VotingSettings = ({ votingAddress }) => {
     write: changeTitle,
   } = useContractWrite(titleConfig);
 
-  const { config: quorumConfig } = usePrepareContractWrite({
-    address: votingAddress,
-    abi: ABI,
-    functionName: "changeQuorum",
-    args: [quorom],
-  });
-  const {
-    isLoading: quorumLoading,
-    isSuccess: quorumSuccess,
-    write: changeQuorum,
-  } = useContractWrite(quorumConfig);
-
   const { config: durationConfig } = usePrepareContractWrite({
     address: votingAddress,
     abi: ABI,
@@ -70,18 +57,16 @@ const VotingSettings = ({ votingAddress }) => {
   } = useContractWrite(durationConfig);
 
   useEffect(() => {
-    if (titleLoading || quorumLoading || durationLoading) {
+    if (titleLoading || durationLoading) {
       transactionIsLoading();
     }
 
-    if (titleSuccess || quorumSuccess || durationSuccess) {
+    if (titleSuccess || durationSuccess) {
       transactionIsSuccess();
     }
   }, [
     titleLoading,
     titleSuccess,
-    quorumLoading,
-    quorumSuccess,
     durationLoading,
     durationSuccess,
   ]);
@@ -124,32 +109,7 @@ const VotingSettings = ({ votingAddress }) => {
           </Form>
           <Divider />
           <Form>
-            <Form.Item>
-              <div
-                style={{
-                  textAlign: "center",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                <div style={{ marginRight: "10px" }}>Quorom:</div>
-                <InputNumber
-                  style={{ marginRight: "10px" }}
-                  min={0}
-                  value={quorom}
-                  onChange={setQuorom}
-                />
-                <Button
-                  danger
-                  htmlType="submit"
-                  onClick={() => changeQuorum?.()}
-                >
-                  Change Quorom
-                </Button>
-              </div>
-            </Form.Item>
           </Form>
-          <Divider />
           <Form>
             <Form.Item>
               <div

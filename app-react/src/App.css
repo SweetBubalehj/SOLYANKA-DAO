@@ -6,21 +6,55 @@
   background-color: rgba(255, 255, 255, 0.1) !important;
 }
 
+.ant-modal {
+  min-width: 350px;
+}
+
+.ant-layout-header {
+  padding-inline: 0px;
+}
+
+@media (max-width: 1200px) {
+  .ant-layout-header {
+    padding-inline: 30px;
+  }
+}
+
+@media (max-width: 992px) {
+  .ant-layout-header {
+    padding-inline: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .ant-layout-header {
+    padding-inline: 10px;
+  }
+}
+
+@media (max-width: 576px) {
+  .ant-layout-header {
+    padding-inline: 5;
+  }
+}
+
+
+/* 
 .check {
   align-items: center;
-    background: #fcfcfd;
-    border: 2px solid #e8eaee;
-    border-radius: 50px;
-    box-sizing: border-box;
-    display: flex;
-    cursor: pointer;
-    flex-direction: column;
-    justify-content: space-between;
-    margin-left: auto;
-    margin-right: auto;
-    min-height: 90px;
-    padding: 32px 15px;
-    position: relative;
-    transition: transform .15s;
-    width:30%;
-}
+  background: #fcfcfd;
+  border: 2px solid #e8eaee;
+  border-radius: 50px;
+  box-sizing: border-box;
+  display: flex;
+  cursor: pointer;
+  flex-direction: column;
+  justify-content: space-between;
+  margin-left: auto;
+  margin-right: auto;
+  min-height: 90px;
+  padding: 32px 15px;
+  position: relative;
+  transition: transform 0.15s;
+  width: 30%;
+} */

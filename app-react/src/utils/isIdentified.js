@@ -1,17 +1,17 @@
 import { useContractRead, useAccount } from "wagmi";
 import { Address, ABI } from "../contracts/sbtContract";
 
-const useGetIsVerified = () => {
+const useCheckIdentity = () => {
   const { address } = useAccount();
 
   const { data: isVerified } = useContractRead({
     address: Address,
     abi: ABI,
-    functionName: "getIsIdentified",
+    functionName: "checkIdentity",
     args: [address],
   });
 
   return isVerified;
 };
 
-export default useGetIsVerified;
+export default useCheckIdentity;

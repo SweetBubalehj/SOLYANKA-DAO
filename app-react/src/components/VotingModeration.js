@@ -26,7 +26,7 @@ const VotingModeration = ({ votingAddress }) => {
   const { config: titleConfig } = usePrepareContractWrite({
     address: votingAddress,
     abi: ABI,
-    functionName: "changeTitle",
+    functionName: "moderateTitle",
     args: [title],
   });
 

@@ -4,15 +4,14 @@ import { Address, ABI } from "../contracts/sbtContract";
 const useGetIsAdmin = () => {
   const { address } = useAccount();
 
-  const { data: isAdmin } = useContractRead({
+  const { data: roleInfo } = useContractRead({
     address: Address,
     abi: ABI,
-    functionName: "identities",
+    functionName: "getRole",
     args: [address],
   });
 
-  //добавил isAdmin(!)
-  if (isAdmin && isAdmin.roleWeight > 1) {
+  if (roleInfo && roleInfo === 2) {
     return true;
   } else {
     return false;

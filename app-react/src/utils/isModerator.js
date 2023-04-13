@@ -4,14 +4,14 @@ import { Address, ABI } from "../contracts/sbtContract";
 const useGetIsModerator = () => {
   const { address } = useAccount();
 
-  const { data: identifyInfo } = useContractRead({
+  const { data: roleInfo } = useContractRead({
     address: Address,
     abi: ABI,
-    functionName: "getIdentityInfo",
+    functionName: "getRole",
     args: [address],
   });
 
-  if (identifyInfo && identifyInfo[4] > 0) {
+  if (roleInfo && roleInfo > 0) {
     return true;
   } else return false;
 };

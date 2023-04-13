@@ -46,7 +46,7 @@ contract SBToken {
 
         address addrSoul = msg.sender;
         souls[addrSoul].name = _name;
-        souls[addrSoul].name = _email;
+        souls[addrSoul].name = _email; // <-- bug
         souls[addrSoul].age = _age;
         souls[addrSoul].owner = addrSoul;
     }
@@ -70,7 +70,7 @@ contract SBToken {
 
         address addrSoul = msg.sender;
         souls[addrSoul].name = _name;
-        souls[addrSoul].name = _email;
+        souls[addrSoul].name = _email; // <-- bug
         souls[addrSoul].age = _age;
     }
 
