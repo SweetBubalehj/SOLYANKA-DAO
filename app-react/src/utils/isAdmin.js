@@ -11,9 +11,12 @@ const useGetIsAdmin = () => {
     args: [address],
   });
 
-  if (isAdmin.roleWeight > 1) {
+  //добавил isAdmin(!)
+  if (isAdmin && isAdmin.roleWeight > 1) {
     return true;
-  } else return false;
+  } else {
+    return false;
+  }
 };
 
 export default useGetIsAdmin;

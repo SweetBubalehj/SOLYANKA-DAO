@@ -1,24 +1,39 @@
 import React, { useEffect, useState } from "react";
-import { useContractRead, useAccount, useContractWrite } from "wagmi";
+import {
+  useContractRead,
+  useAccount,
+  useContractWrite,
+  usePrepareContractWrite,
+} from "wagmi";
 import factoryABI from "../abi/factoryABI";
+import useGetIsModerator from "../utils/isModerator";
+import useGetIsAdmin from "../utils/isAdmin";
 import { Card, Typography, Modal, Form, Input, Button } from "antd";
 
 const { Title, Text } = Typography;
 
 const IdentityInfo = () => {
+  //Contract part
   const { address } = useAccount();
+
+  const [newUserName, setNewUserName] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [newAge, setNewAge] = useState(13);
+
+  const { config } = usePrepareContractWrite({
+    address: "0xE7cDD9eDD77fC483F927233459F4f2A04008c616",
+    abi: factoryABI,
+    functionName: "updateIdentity",
+    args: [newUserName, newEmail, newAge],
+  });
+
+  const { data, isLoading, isSuccess, write } = useContractWrite(config);
 
   const { data: identifyInfo } = useContractRead({
     address: "0xE7cDD9eDD77fC483F927233459F4f2A04008c616",
     abi: factoryABI,
     functionName: "getIdentityInfo",
     args: [address],
-  });
-
-  const { write: writeIdentityInfo } = useContractWrite({
-    address: "0xE7cDD9eDD77fC483F927233459F4f2A04008c616",
-    abi: factoryABI,
-    functionName: "updateIdentity",
   });
 
   const [userName, setUserName] = useState(null);
@@ -56,18 +71,40 @@ const IdentityInfo = () => {
     }
   }, [identifyInfo]);
 
+  //Modal part
   const showModal = () => {
+    setNewUserName(userName);
+    setNewEmail(userEmail);
+    setNewAge(userAge);
     setIsModalOpen(true);
   };
 
   const handleOk = () => {
+    write?.(userName, userEmail, Number(userAge));
     setIsModalOpen(false);
   };
 
   const handleCancel = () => {
-    setIsModalOpen(false);
+    setIsModalOpen(false); // Fixed typo
+  };
+  //
+
+  //Admin and Moderator part
+  const isAdmin = useGetIsAdmin();
+  const isModerator = useGetIsModerator();
+
+  const handleAdminButtonClick = () => {
+    if (isAdmin) {
+      // Выполните действие, связанное с админской кнопкой
+    }
   };
 
+  const handleModeratorButtonClick = () => {
+    if (isModerator) {
+      // Выполните действие, связанное с модераторской кнопкой
+    }
+  };
+  //
   return (
     <Card title="Your profile">
       {address && (
@@ -86,35 +123,66 @@ const IdentityInfo = () => {
           <br />
         </>
       )}
-      {address && (
+      {address && !isLoading && (
         <Button type="primary" onClick={showModal}>
           Edit profile.
         </Button>
+      )}
+      {isAdmin && (
+        <button onClick={handleAdminButtonClick}>Admin button.</button>
+      )}
+      {isModerator && (
+        <button onClick={handleModeratorButtonClick}>Moderator button.</button>
       )}
       <Modal
         title="Edit profile"
         open={isModalOpen}
         onOk={handleOk}
+        onShow={showModal}
+        okButtonProps={{ disabled: !(userName && userEmail && userAge) }}
         onCancel={handleCancel}
       >
         <Form>
           <Form.Item label="Username">
             <Input
-              value={userName}
-              onChange={(e) => setUserName(e.target.value)}
+              value={newUserName}
+              onChange={(e) => setNewUserName(e.target.value)}
             />
           </Form.Item>
           <Form.Item label="Email">
             <Input
-              value={userEmail}
-              onChange={(e) => setUserEmail(e.target.value)}
+              value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
             />
           </Form.Item>
           <Form.Item label="Age">
+            <Input value={newAge} onChange={(e) => setNewAge(e.target.value)} />
+          </Form.Item>
+        </Form>
+      </Modal>
+      <Modal
+        title="Modarator button"
+        open={isModalOpen}
+        onOk={handleOk}
+        onShow={showModal}
+        okButtonProps={{ disabled: !(userName && userEmail && userAge) }}
+        onCancel={handleCancel}
+      >
+        <Form>
+          <Form.Item label="Username">
             <Input
-              value={userAge}
-              onChange={(e) => setUserAge(e.target.value)}
+              value={newUserName}
+              onChange={(e) => setNewUserName(e.target.value)}
             />
+          </Form.Item>
+          <Form.Item label="Email">
+            <Input
+              value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
+            />
+          </Form.Item>
+          <Form.Item label="Age">
+            <Input value={newAge} onChange={(e) => setNewAge(e.target.value)} />
           </Form.Item>
         </Form>
       </Modal>
