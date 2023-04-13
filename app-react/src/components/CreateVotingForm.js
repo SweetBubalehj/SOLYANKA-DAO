@@ -13,7 +13,7 @@ import {
   Collapse,
   notification,
 } from "antd";
-import factoryABI from "../abi/factoryABI";
+import { Address, ABI } from "../contracts/factoryContract";
 import useGetIsVerified from "../utils/isIdentified";
 import {
   FormOutlined,
@@ -51,8 +51,8 @@ const CreateVotingForm = () => {
   }
 
   const { config } = usePrepareContractWrite({
-    address: "0xE7cDD9eDD77fC483F927233459F4f2A04008c616",
-    abi: factoryABI,
+    address: Address,
+    abi: ABI,
     functionName: "createVoting",
     args: [title, proposalNames, durationMinutes, quorom, isKYC],
   });

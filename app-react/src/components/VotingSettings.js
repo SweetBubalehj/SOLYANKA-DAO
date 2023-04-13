@@ -7,10 +7,10 @@ import {
   Divider,
   notification,
 } from "antd";
-import votingABI from "../abi/votingABI";
 import { useState, useEffect } from "react";
 import { Collapse } from "antd";
 import { FormOutlined } from "@ant-design/icons";
+import { ABI } from "../contracts/votingContract";
 
 const { Panel } = Collapse;
 
@@ -35,7 +35,7 @@ const VotingSettings = ({ votingAddress }) => {
 
   const { config: titleConfig } = usePrepareContractWrite({
     address: votingAddress,
-    abi: votingABI,
+    abi: ABI,
     functionName: "changeTitle",
     args: [title],
   });
@@ -47,7 +47,7 @@ const VotingSettings = ({ votingAddress }) => {
 
   const { config: quorumConfig } = usePrepareContractWrite({
     address: votingAddress,
-    abi: votingABI,
+    abi: ABI,
     functionName: "changeQuorum",
     args: [quorom],
   });
@@ -59,7 +59,7 @@ const VotingSettings = ({ votingAddress }) => {
 
   const { config: durationConfig } = usePrepareContractWrite({
     address: votingAddress,
-    abi: votingABI,
+    abi: ABI,
     functionName: "addDurationTime",
     args: [durationMinutes],
   });

@@ -1,8 +1,8 @@
 import { useContractWrite, usePrepareContractWrite } from "wagmi";
 import { Form, Input, Button, Collapse, notification } from "antd";
-import votingABI from "../abi/votingABI";
 import { useState, useEffect } from "react";
 import { FormOutlined } from "@ant-design/icons";
+import { ABI } from "../contracts/votingContract";
 
 const { Panel } = Collapse;
 
@@ -25,7 +25,7 @@ const VotingModeration = ({ votingAddress }) => {
 
   const { config: titleConfig } = usePrepareContractWrite({
     address: votingAddress,
-    abi: votingABI,
+    abi: ABI,
     functionName: "changeTitle",
     args: [title],
   });

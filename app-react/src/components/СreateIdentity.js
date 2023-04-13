@@ -1,6 +1,6 @@
 import { useContractWrite, usePrepareContractWrite } from "wagmi";
 import { Form, Input, Button, InputNumber, notification } from "antd";
-import factoryABI from "../abi/factoryABI";
+import { Address, ABI } from "../contracts/factoryContract";
 import { useState, useEffect } from "react";
 import useGetIsVerified from "../utils/isIdentified";
 import { MailOutlined, UserOutlined } from "@ant-design/icons";
@@ -13,8 +13,8 @@ function CreateIdentityForm() {
   const isVerified = useGetIsVerified();
 
   const { config } = usePrepareContractWrite({
-    address: "0xE7cDD9eDD77fC483F927233459F4f2A04008c616",
-    abi: factoryABI,
+    address: Address,
+    abi: ABI,
     functionName: "createIdentity",
     args: [name, email, age],
   });

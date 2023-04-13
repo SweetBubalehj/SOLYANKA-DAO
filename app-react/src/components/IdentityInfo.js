@@ -5,7 +5,7 @@ import {
   useContractWrite,
   usePrepareContractWrite,
 } from "wagmi";
-import factoryABI from "../abi/factoryABI";
+import { Address, ABI } from "../contracts/sbtContract";
 import useGetIsModerator from "../utils/isModerator";
 import useGetIsAdmin from "../utils/isAdmin";
 import { Card, Typography, Modal, Form, Input, Button } from "antd";
@@ -21,8 +21,8 @@ const IdentityInfo = () => {
   const [newAge, setNewAge] = useState(13);
 
   const { config } = usePrepareContractWrite({
-    address: "0xE7cDD9eDD77fC483F927233459F4f2A04008c616",
-    abi: factoryABI,
+    address: Address,
+    abi: ABI,
     functionName: "updateIdentity",
     args: [newUserName, newEmail, newAge],
   });
@@ -30,8 +30,8 @@ const IdentityInfo = () => {
   const { data, isLoading, isSuccess, write } = useContractWrite(config);
 
   const { data: identifyInfo } = useContractRead({
-    address: "0xE7cDD9eDD77fC483F927233459F4f2A04008c616",
-    abi: factoryABI,
+    address: Address,
+    abi: ABI,
     functionName: "getIdentityInfo",
     args: [address],
   });

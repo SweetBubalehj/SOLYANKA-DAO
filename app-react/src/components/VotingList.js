@@ -18,8 +18,11 @@ import {
   Col,
   notification,
 } from "antd";
-import factoryABI from "../abi/factoryABI";
-import votingABI from "../abi/votingABI";
+import {
+  Address as factoryAddress,
+  ABI as factoryABI,
+} from "../contracts/factoryContract";
+import { ABI as votingABI } from "../contracts/votingContract";
 import { ethers } from "ethers";
 import useGetIsVerified from "../utils/isIdentified";
 import { ClockCircleOutlined } from "@ant-design/icons";
@@ -65,7 +68,7 @@ const VotingList = () => {
   };
 
   const { data } = useContractRead({
-    address: "0xE7cDD9eDD77fC483F927233459F4f2A04008c616",
+    address: factoryAddress,
     abi: factoryABI,
     functionName: "getDeployedVotings",
   });
