@@ -6,24 +6,6 @@
 // global scope, and execute the script.
 const hre = require("hardhat");
 
-async function main() {
-  const constructorArguments = ["Bubaleh", "...@gmail.com", 21];
-  const VotingFactory = await hre.ethers.getContractFactory("VotingFactory");
-  const contract = await VotingFactory.deploy(
-    constructorArguments[0],
-    constructorArguments[1],
-    constructorArguments[2]
-  );
-
-  await contract.deployed();
-
-  console.log(`Contract deployed to ${contarct.address}`);
-  if (network.config.chainId === 97) {
-    contract.deployTransaction.wait(15);
-    verify(contarct.address, [constructorArguments]);
-  }
-}
-
 async function verify(contractAddress, arguments) {
   try {
     await run("verify:verify", {
@@ -36,6 +18,54 @@ async function verify(contractAddress, arguments) {
     } else {
       console.log(e);
     }
+  }
+}
+
+async function main() {
+  const SBTArgs = ["Solyanka SBT", "Bubaleh", "...@gmail.com", 21];
+  const SBToken = await hre.ethers.getContractFactory("SBToken");
+  const SBTContract = await SBToken.deploy(
+    SBTArgs[0],
+    SBTArgs[1],
+    SBTArgs[2],
+    SBTArgs[3]
+  );
+  await SBTContract.deployed();
+  console.log(`SBT deployed to ${SBTContract.address}`);
+
+  const SolyankaToken = await hre.ethers.getContractFactory("SolyankaToken");
+  const SolyankaTokenContract = await SolyankaToken.deploy();
+  await SolyankaTokenContract.deployed();
+  console.log(`Solyanka Token deployed to ${SolyankaTokenContract.address}`);
+
+  const StakingArgs = [SolyankaTokenContract.address, SBTContract.address];
+  const Staking = await hre.ethers.getContractFactory("Staking");
+  const StakingContract = await Staking.deploy(StakingArgs[0], StakingArgs[1]);
+  await StakingContract.deployed();
+  console.log(`Staking deployed to ${StakingContract.address}`);
+
+  const VotingFactoryArgs = SBTContract.address;
+  const VotingFactory = await hre.ethers.getContractFactory("VotingFactory");
+  const VotingFactoryContract = await VotingFactory.deploy(VotingFactoryArgs);
+  await VotingFactoryContract.deployed();
+  console.log(`Voting Factory deployed to ${VotingFactoryContract.address}`);
+
+  if (network.config.chainId === 97) {
+    SBTContract.deployTransaction.wait(15);
+    verify(SBTContract.address, [SBTArgs]);
+    console.log("SBT Contract verified!");
+
+    SolyankaTokenContract.deployTransaction.wait(15);
+    verify(SolyankaTokenContract.address, []);
+    console.log("Solyanka Token Contract verified!");
+
+    StakingContract.deployTransaction.wait(15);
+    verify(StakingContract.address, [StakingArgs]);
+    console.log("Staking Contract verified!");
+
+    VotingFactoryContract.deployTransaction.wait(15);
+    verify(VotingFactoryContract.address, [VotingFactoryArgs]);
+    console.log("Voting Factory Contract verified!");
   }
 }
 

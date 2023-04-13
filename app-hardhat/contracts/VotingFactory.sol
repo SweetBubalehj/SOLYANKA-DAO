@@ -2,6 +2,7 @@
 
 pragma solidity ^0.8.18;
 
+import "./ISBToken.sol";
 import "./Voting.sol";
 import "./TokenWeightedVoting.sol";
 
@@ -16,24 +17,7 @@ contract VotingFactory {
     address[] private deployedVotings;
     address[] private deployedTokenWeightedVotings;
 
-    /**
-     * if KYC = false it's not authorizated user;
-     * if KYC = true it's authorizated user;
-     *
-     * if roleWeight = 0 it's user;
-     * if roleWeight = 1 it's moderator;
-     * if roleWeight = 2 it's admin;
-     */
-    struct Identity {
-        string name;
-        string email;
-        uint age;
-        bool KYC;
-        uint roleWeight;
-        address owner;
-    }
-
-    mapping(address => Identity) private identities;
+    address private sbtAddress;
 
     /**
      * Mapping to have a copy of Votings
@@ -49,8 +33,11 @@ contract VotingFactory {
      * Moderators modifier
      * Moderators can add/remove users to/from KYC
      */
-    modifier isModerator() {
-        require(identities[msg.sender].roleWeight > 0, "Not a Moderator!");
+    modifier onlyModerator() {
+        require(
+            ISBToken(sbtAddress).getRole(msg.sender) > 0,
+            "Not a Moderator!"
+        );
         _;
     }
 
@@ -58,8 +45,8 @@ contract VotingFactory {
      * Admin modifier
      * Admin can add/remove moderators and users to/from KYC
      */
-    modifier isAdmin() {
-        require(identities[msg.sender].roleWeight == 2, "Not an Admin!");
+    modifier onlyAdmin() {
+        require(ISBToken(sbtAddress).getRole(msg.sender) == 2, "Not an Admin!");
         _;
     }
 
@@ -68,8 +55,11 @@ contract VotingFactory {
      * Requires basic information about the user (name, email, age)
      * Indentified user can vote and create votings
      */
-    modifier isIdentified(address _owner) {
-        require(identities[_owner].owner != address(0), "Identity not found");
+    modifier onlyIdentified(address _owner) {
+        require(
+            ISBToken(sbtAddress).getOwner(msg.sender) != address(0),
+            "Identity not found"
+        );
         _;
     }
 
@@ -84,20 +74,12 @@ contract VotingFactory {
         address _votingAddress
     );
 
-    /**
-     * Contructor creates admin
-     * Contract creator creates profile with Admin role
-     * Adds it to KYC
-     */
-    constructor(
-        string memory adminName,
-        string memory adminEmail,
-        uint adminAge
-    ) {
-        createIdentity(adminName, adminEmail, adminAge);
+    constructor(address _sbtAddress) {
+        sbtAddress = _sbtAddress;
+    }
 
-        identities[msg.sender].KYC = true;
-        identities[msg.sender].roleWeight = 2;
+    function changeAddrContr(address _addr) public onlyAdmin {
+        sbtAddress = _addr;
     }
 
     /**
@@ -109,11 +91,12 @@ contract VotingFactory {
         string memory title,
         string[] memory proposalNames,
         uint durationMinutes,
-        uint quorom,
         bool isKYC,
         bool isPrivate
-    ) public isIdentified(msg.sender) returns (address) {
-        if (identities[msg.sender].KYC == false && isKYC == true) {
+    ) public onlyIdentified(msg.sender) returns (address) {
+        if (
+            ISBToken(sbtAddress).checkKYC(msg.sender) == false && isKYC == true
+        ) {
             revert("Only for KYC'ed users");
         }
 
@@ -122,7 +105,6 @@ contract VotingFactory {
             proposalNames,
             durationMinutes,
             msg.sender,
-            quorom,
             isKYC,
             isPrivate
         );
@@ -149,7 +131,7 @@ contract VotingFactory {
         string[] memory proposalNames,
         uint durationMinutes,
         address tokenAddress
-    ) public isModerator returns (address) {
+    ) public onlyModerator returns (address) {
         TokenWeightedVoting newVoting = new TokenWeightedVoting(
             title,
             proposalNames,
@@ -166,52 +148,8 @@ contract VotingFactory {
         return newVotingAddress;
     }
 
-    /**
-     * Identity creator, registration
-     * Allows user to create their info
-     * (name, email, age)
-     * GP-13
-     */
-    function createIdentity(
-        string memory _name,
-        string memory _email,
-        uint _age
-    ) public {
-        require(
-            identities[msg.sender].owner == address(0),
-            "Identity already exists"
-        );
-        require(_age >= 13, "PG-13");
-
-        Identity memory newIdentity = Identity(
-            _name,
-            _email,
-            _age,
-            false,
-            0,
-            msg.sender
-        );
-        identities[msg.sender] = newIdentity;
-    }
-
-    /**
-     * Identity updater
-     * Allows user to change their info
-     * (name, email, age)
-     * GP-13
-     */
-    function updateIdentity(
-        string memory _name,
-        string memory _email,
-        uint _age
-    ) public isIdentified(msg.sender) {
-        require(_age >= 13, "PG-13");
-
-        Identity storage identity = identities[msg.sender];
-
-        identity.name = _name;
-        identity.email = _email;
-        identity.age = _age;
+    function getSBTAddress() public view returns (address) {
+        return sbtAddress;
     }
 
     /**
@@ -230,65 +168,6 @@ contract VotingFactory {
         returns (address[] memory)
     {
         return deployedTokenWeightedVotings;
-    }
-
-    /**
-     * Getter, returns user's identification info
-     * (name, email, age, KYC, roleWeight)
-     */
-    function getIdentityInfo(
-        address _owner
-    )
-        public
-        view
-        isIdentified(_owner)
-        returns (string memory, string memory, uint, bool, uint)
-    {
-        Identity memory identity = identities[_owner];
-
-        return (
-            identity.name,
-            identity.email,
-            identity.age,
-            identity.KYC,
-            identity.roleWeight
-        );
-    }
-
-    /**
-     * Getter, returns true/false of identification
-     * If user created profile (registered) return true, else false
-     */
-    function getIsIdentified(address _owner) public view returns (bool) {
-        if (identities[_owner].owner != address(0)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * Getter, returns true/false of authorization
-     * If user authorizated return true, else false
-     */
-    function getIsKYC(address _owner) public view returns (bool) {
-        if (identities[_owner].KYC == true) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * Getter, returns true/false of moderation
-     * If user is moderator return true, else false
-     */
-    function getIsModerator(address _owner) public view returns (bool) {
-        if (identities[_owner].roleWeight > 0) {
-            return true;
-        } else {
-            return false;
-        }
     }
 
     /**
@@ -311,37 +190,5 @@ contract VotingFactory {
         TokenWeightedVoting voting = tokenWeightedVotings[votingAddress];
 
         return voting.getWinnerName();
-    }
-
-    /**
-     * Only moderators and admin can add to KYC
-     * Adding adding to KYC requires user's identification
-     */
-    function addToKYC(address user) public isModerator isIdentified(user) {
-        identities[user].KYC = true;
-    }
-
-    /**
-     * Only moderators and admin can remove from KYC
-     */
-    function removeFromKYC(address user) public isModerator {
-        identities[user].KYC = false;
-    }
-
-    /**
-     * Only admin can add moderators
-     * Adding moderator requires user's identification
-     */
-    function addModerator(address user) public isAdmin isIdentified(user) {
-        require(identities[user].roleWeight < 1, "Already has role");
-        identities[user].roleWeight = 1;
-    }
-
-    /**
-     * Only admin can remove moderators
-     */
-    function removeModerator(address user) public isAdmin {
-        require(identities[user].roleWeight != 2, "Admin can't be deleted");
-        identities[user].roleWeight = 0;
     }
 }

@@ -3,32 +3,21 @@
 pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "contracts/IVotingFactory.sol";
-
-interface IToken {
-    function transfer(
-        address recipient,
-        uint256 amount
-    ) external returns (bool);
-
-    function balanceOf(address account) external view returns (uint256);
-
-    function transferFrom(
-        address sender,
-        address recipient,
-        uint256 amount
-    ) external returns (uint256);
-}
+import "./ISBToken.sol";
+import "./IToken.sol";
+import "./IVotingFactory.sol";
 
 /**
  * Voting is a session to vote for proposals
  */
 contract TokenWeightedVoting is ReentrancyGuard {
+    address public votingFactoryAddress;
+    address public sbtAddress;
+
     uint public endTime;
     string public title;
 
     IToken private solyankaToken;
-    IVotingFactory private votingFactory;
     Proposal[] private proposals;
 
     struct Proposal {
@@ -60,8 +49,11 @@ contract TokenWeightedVoting is ReentrancyGuard {
      * If it's required KYC - check user's KYC
      */
     modifier isIdentified(address _owner) {
-        require(votingFactory.getIsIdentified(_owner), "Identity not found");
-        require(votingFactory.getIsKYC(_owner), "Is not KYC'ed");
+        require(
+            ISBToken(sbtAddress).checkIdentity(_owner),
+            "Identity not found"
+        );
+        require(ISBToken(sbtAddress).checkKYC(_owner), "Is not KYC'ed");
         _;
     }
 
@@ -78,10 +70,7 @@ contract TokenWeightedVoting is ReentrancyGuard {
         uint _durationMinutes,
         address _tokenAddress
     ) {
-        require(
-            address(_tokenAddress) != address(0),
-            "Token address(0)"
-        );
+        require(address(_tokenAddress) != address(0), "Token address(0)");
         require(isNotBlank(_title), "Empty string");
         require(_proposalNames.length >= 2, "At least 2 proposals");
         require(
@@ -93,7 +82,8 @@ contract TokenWeightedVoting is ReentrancyGuard {
 
         endTime = block.timestamp + _durationMinutes * 1 minutes;
 
-        votingFactory = IVotingFactory(msg.sender);
+        votingFactoryAddress = msg.sender;
+        sbtAddress = IVotingFactory(votingFactoryAddress).getSBTAddress();
 
         for (uint i = 0; i < _proposalNames.length; i++) {
             require(isNotBlank(_proposalNames[i]), "Empty proposal string");
@@ -182,7 +172,10 @@ contract TokenWeightedVoting is ReentrancyGuard {
      * Requires moderator and voting time is not up
      */
     function moderateTitle(string memory _title) public {
-        require(votingFactory.getIsModerator(msg.sender), "Not a moderator");
+        require(
+            ISBToken(sbtAddress).getRole(msg.sender) > 0,
+            "Not a moderator"
+        );
         require(isNotBlank(_title), "Empty title string");
 
         title = _title;
