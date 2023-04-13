@@ -47,7 +47,7 @@ module.exports = {
   etherscan: {
     // Your API key for Etherscan
     // Obtain one at https://bscscan.com/
-    apiKey: process.env.API_KEY,
+    apiKey: {bscTestnet: process.env.API_KEY},
   },
   mocha: {
     timeout: 20000,

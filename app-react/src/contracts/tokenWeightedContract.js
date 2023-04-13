@@ -1,4 +1,4 @@
-const votingABI = [
+export const ABI = [
   {
     inputs: [
       {
@@ -18,18 +18,8 @@ const votingABI = [
       },
       {
         internalType: "address",
-        name: "_chairPerson",
+        name: "_tokenAddress",
         type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "_quorum",
-        type: "uint256",
-      },
-      {
-        internalType: "bool",
-        name: "_isKYC",
-        type: "bool",
       },
     ],
     stateMutability: "nonpayable",
@@ -57,40 +47,35 @@ const votingABI = [
   {
     inputs: [
       {
-        internalType: "uint256",
-        name: "_durationMinutes",
-        type: "uint256",
-      },
-    ],
-    name: "addDurationTime",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "chairPerson",
-    outputs: [
-      {
         internalType: "address",
         name: "",
         type: "address",
       },
     ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
+    name: "addressToVoter",
+    outputs: [
       {
         internalType: "uint256",
-        name: "_quorum",
+        name: "tokenVoteWeight",
         type: "uint256",
       },
+      {
+        internalType: "uint256",
+        name: "choice",
+        type: "uint256",
+      },
+      {
+        internalType: "bool",
+        name: "voted",
+        type: "bool",
+      },
+      {
+        internalType: "bool",
+        name: "claimed",
+        type: "bool",
+      },
     ],
-    name: "changeQuorum",
-    outputs: [],
-    stateMutability: "nonpayable",
+    stateMutability: "view",
     type: "function",
   },
   {
@@ -103,6 +88,19 @@ const votingABI = [
     ],
     name: "changeTitle",
     outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "claimTokens",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
     stateMutability: "nonpayable",
     type: "function",
   },
@@ -136,7 +134,7 @@ const votingABI = [
             type: "uint256",
           },
         ],
-        internalType: "struct Voting.Proposal[]",
+        internalType: "struct TokenWeightedVoting.Proposal[]",
         name: "",
         type: "tuple[]",
       },
@@ -197,26 +195,26 @@ const votingABI = [
     type: "function",
   },
   {
-    inputs: [],
-    name: "isKYC",
-    outputs: [
+    inputs: [
       {
-        internalType: "bool",
-        name: "",
-        type: "bool",
+        internalType: "string",
+        name: "_title",
+        type: "string",
       },
     ],
-    stateMutability: "view",
+    name: "moderateTitle",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
     inputs: [],
-    name: "quorum",
+    name: "sbtAddress",
     outputs: [
       {
-        internalType: "uint256",
+        internalType: "address",
         name: "",
-        type: "uint256",
+        type: "address",
       },
     ],
     stateMutability: "view",
@@ -239,6 +237,11 @@ const votingABI = [
     inputs: [
       {
         internalType: "uint256",
+        name: "voteWeight",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
         name: "proposal",
         type: "uint256",
       },
@@ -246,30 +249,6 @@ const votingABI = [
     name: "vote",
     outputs: [],
     stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    name: "voters",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "voted",
-        type: "bool",
-      },
-      {
-        internalType: "uint256",
-        name: "vote",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
     type: "function",
   },
   {
@@ -286,5 +265,3 @@ const votingABI = [
     type: "function",
   },
 ];
-
-export default votingABI;
