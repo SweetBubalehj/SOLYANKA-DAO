@@ -33,15 +33,6 @@ const AdminModeratorButtons = () => {
 
   //Admin and Moderator part
   const isAdmin = useGetIsAdmin();
-  const isModerator = useGetIsModerator();
-
-  const handleAdminButtonClick = () => {
-    console.log("Hello admin");
-  };
-
-  const handleModeratorButtonClick = () => {
-    console.log("Hello mod");
-  };
   //
   return (
     <Card title="">

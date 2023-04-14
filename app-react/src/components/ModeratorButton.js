@@ -41,10 +41,8 @@ const ModeratorButtons = () => {
 
   const handleOk = () => {
     const kyc = !componentDisabled;
-    write?.(addrSoul, kyc).then((result) => {
-      console.log(result);
-    });
-    setIsModalOpen(false);
+    write?.();
+    //setIsModalOpen(false);
   };
 
   const handleCancel = () => {
@@ -53,38 +51,42 @@ const ModeratorButtons = () => {
   //
 
   //Admin and Moderator part
-  const isAdmin = useGetIsAdmin();
   const isModerator = useGetIsModerator();
+  console.log(isModerator);
   //
   return (
-    <Card title="">
-      <Modal
-        title="Set KYC status for a soul"
-        open={isModalOpen}
-        onOk={handleOk}
-        onShow={showModal}
-        onCancel={handleCancel}
-      >
-        <Form>
-          <Form.Item label="Soul address" name="username">
-            <Input
-              value={addrSoul}
-              onChange={(e) => setAddrSoul(e.target.value)}
-            />
-          </Form.Item>
+    <>
+      {isModerator && (
+        <Card title="">
+          <Modal
+            title="Set KYC status for a soul"
+            open={isModalOpen}
+            onOk={handleOk}
+            onShow={showModal}
+            onCancel={handleCancel}
+          >
+            <Form>
+              <Form.Item label="Soul address" name="username">
+                <Input
+                  value={addrSoul}
+                  onChange={(e) => setAddrSoul(e.target.value)}
+                />
+              </Form.Item>
 
-          <Form.Item label="KYC?" name="username">
-            <Checkbox
-              checked={!componentDisabled}
-              onChange={(e) => setComponentDisabled(!e.target.checked)}
-            />
-          </Form.Item>
-        </Form>
-      </Modal>
-      <Button type="primary" onClick={showModal}>
-        Moderator options.
-      </Button>
-    </Card>
+              <Form.Item label="KYC?" name="username">
+                <Checkbox
+                  checked={!componentDisabled}
+                  onChange={(e) => setComponentDisabled(!e.target.checked)}
+                />
+              </Form.Item>
+            </Form>
+          </Modal>
+          <Button type="primary" onClick={showModal}>
+            Moderator options.
+          </Button>
+        </Card>
+      )}
+    </>
   );
 };
 
