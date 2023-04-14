@@ -65,12 +65,6 @@ const AdminModeratorButtons = () => {
       <Button type="primary" onClick={showModal}>
         Admin options
       </Button>
-      {isAdmin && (
-        <Button onClick={handleAdminButtonClick}>Admin button.</Button>
-      )}
-      {isModerator && (
-        <Button onClick={handleModeratorButtonClick}>Moderator button.</Button>
-      )}
     </Card>
   );
 };
