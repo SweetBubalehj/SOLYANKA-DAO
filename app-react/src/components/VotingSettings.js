@@ -245,13 +245,21 @@ const VotingSettings = ({ votingAddress, isPrivate }) => {
                     )}
                   </Form.List>
                 </Form.Item>
-                <Button
-                  danger
-                  htmlType="submit"
-                  onClick={() => addToWhitelist?.()}
+                <Form.Item
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "flex-end",
+                  }}
                 >
-                  Add To Whitelist
-                </Button>
+                  <Button
+                    danger
+                    htmlType="submit"
+                    onClick={() => addToWhitelist?.()}
+                  >
+                    Add To Whitelist
+                  </Button>
+                </Form.Item>
               </>
             )}
           </Form>
