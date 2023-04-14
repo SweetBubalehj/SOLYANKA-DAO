@@ -62,10 +62,12 @@ const CreateVotingForm = () => {
 
   const durations = [
     { label: "1 hour", value: 60 },
-    { label: "2 hours", value: 60 },
-    { label: "12 hours", value: 60 },
+    { label: "2 hours", value: 60 * 2 },
+    { label: "12 hours", value: 60 * 12 },
     { label: "1 day", value: 60 * 24 },
+    { label: "3 days", value: 60 * 24 * 3 },
     { label: "1 week", value: 60 * 24 * 7 },
+    { label: "2 weeks", value: 60 * 24 * 14 },
     { label: "1 month", value: 60 * 24 * 30 },
   ];
 

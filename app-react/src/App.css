@@ -38,8 +38,10 @@
   }
 }
 
+div[disabled]{
+  opacity: 30%;
+}
 
-/* 
 .check {
   align-items: center;
   background: #fcfcfd;
@@ -57,4 +59,4 @@
   position: relative;
   transition: transform 0.15s;
   width: 30%;
-} */
+}
