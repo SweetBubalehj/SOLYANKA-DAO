@@ -11,7 +11,7 @@
 }
 
 .ant-layout-header {
-  padding-inline: 0px;
+  padding-inline: 40px;
 }
 
 @media (max-width: 1200px) {
@@ -34,7 +34,7 @@
 
 @media (max-width: 576px) {
   .ant-layout-header {
-    padding-inline: 5;
+    padding-inline: 5px;
   }
 }
 

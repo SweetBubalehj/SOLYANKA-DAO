@@ -80,14 +80,14 @@ const App = () => {
   };
 
   return (
-    <Layout style={{ minWidth: "430px" }}>
+    <Layout style={{ minWidth: "380px" }}>
       <Header>
         <Row justify="space-between" align="middle">
           <Col sm={{ span: 7, offset: 1 }} style={{ display: "flex", alignItems: "center" }}>
             <GlobalOutlined
-              style={{ fontSize: "24px", color: "white", marginRight: "8px" }}
+              style={{ fontSize: "20px", color: "white", marginRight: "8px" }}
             />
-            <Title level={3} style={{ color: "white", margin: 0 }}>
+            <Title level={4} style={{ color: "white", margin: 0 }}>
               SOLYANKA DAO
             </Title>
           </Col>
