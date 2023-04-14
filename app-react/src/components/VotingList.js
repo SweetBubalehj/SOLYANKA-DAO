@@ -110,6 +110,19 @@ const VotingList = () => {
     functionName: "isKYC",
   });
 
+  const { data: isWhitelisted } = useContractRead({
+    address: data?.[selectedVoting],
+    abi: votingABI,
+    functionName: "addressToWhitelist",
+    args: [userAddress],
+  });
+
+  const { data: isPrivate } = useContractRead({
+    address: data?.[selectedVoting],
+    abi: votingABI,
+    functionName: "isPrivate",
+  });
+
   const { config: voteConfig } = usePrepareContractWrite({
     address: data?.[selectedVoting],
     abi: votingABI,
@@ -244,7 +257,10 @@ const VotingList = () => {
     if (userAddress === chairPerson) {
       return (
         <>
-          <VotingSettings votingAddress={data[selectedVoting]} />
+          <VotingSettings
+            votingAddress={data[selectedVoting]}
+            isPrivate={isPrivate}
+          />
           <TimeRemaining />
           <br />
           <Alert message="Chair person can't vote." type="warning" showIcon />
@@ -258,6 +274,32 @@ const VotingList = () => {
           <TimeRemaining />
           <br />
           <Alert message="You have already voted." type="warning" showIcon />
+        </>
+      );
+    }
+
+    if (isPrivate && !isWhitelisted) {
+      return (
+        <>
+          <TimeRemaining />
+          <br />
+          <Alert
+            message="You are not whitelisted"
+            description="You can't vote here, ask chair person to add you."
+            type="warning"
+            showIcon
+          />
+          {isContractKYC && !isUserKYC && (
+            <>
+              <br />
+              <Alert
+                message="You are not identified"
+                description="Verify your identity via KYC to get more features."
+                type="warning"
+                showIcon
+              />
+            </>
+          )}
         </>
       );
     }

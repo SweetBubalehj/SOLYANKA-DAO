@@ -98,8 +98,11 @@ contract Staking is Pausable, ReentrancyGuard {
     function stakeToken(
         uint256 stakeAmount
     ) external nonReentrant whenNotPaused {
-        require(stakeAmount > 0, "Stake amount should be correct");
-        require(stakeAmount < 10000, "Stake amount should be less than 10000");
+        require(
+            stakeAmount > 0 &&
+                stakeAmount <= 10000 * 10 ** IToken(tokenAddress).decimals(), // <= bug was here
+            "Stake amount should be correct"
+        );
         require(block.timestamp < planExpired, "Plan Expired");
         require(
             addressStaked[_msgSender()] == false,

@@ -122,7 +122,8 @@ contract TokenWeightedVoting is ReentrancyGuard {
         Voter storage _user = addressToVoter[msg.sender];
 
         require(
-            voteWeight > 0 && voteWeight < 10000,
+            voteWeight > 0 &&
+                voteWeight <= 10000 * 10 ** solyankaToken.decimals(), // <= bug was here
             "Vote weigth should be correct"
         );
         require(
