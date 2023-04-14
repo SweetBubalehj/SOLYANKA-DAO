@@ -14,6 +14,7 @@ import { GlobalOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import "./App.css";
 import IdentityInfoForm from "./components/IdentityInfo";
+import StakingCards from "./components/StakingCards";
 
 const { Header, Content } = Layout;
 const { Title, Paragraph } = Typography;
@@ -70,6 +71,13 @@ const App = () => {
         </WagmiConfig>
       </>
     ),
+    staking: (
+      <>
+        <WagmiConfig client={wagmiClient}>
+          <StakingCards />
+        </WagmiConfig>
+      </>
+    ),
     profile: (
       <div style={{ textAlign: "center" }}>
         <WagmiConfig client={wagmiClient}>
@@ -100,6 +108,7 @@ const App = () => {
             >
               <Menu.Item key="welcome">Welcome</Menu.Item>
               <Menu.Item key="votings">Votings</Menu.Item>
+              <Menu.Item key="staking">Staking</Menu.Item>
               <Menu.Item key="profile">Profile</Menu.Item>
             </Menu>
           </Col>
@@ -117,7 +126,8 @@ const App = () => {
           margin: "0 auto",
           padding: "50px",
           width: "100%",
-          maxWidth: "1500px"
+          maxWidth: "1500px",
+          height: "100vh"
         }}
       >
         <Row justify="center" gutter={[16, 16]}>
