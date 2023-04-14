@@ -66,14 +66,14 @@ const ModeratorButtons = () => {
             onCancel={handleCancel}
           >
             <Form>
-              <Form.Item label="Soul address" name="username">
+              <Form.Item label="Soul address" name="addrSoul">
                 <Input
                   value={addrSoul}
                   onChange={(e) => setAddrSoul(e.target.value)}
                 />
               </Form.Item>
 
-              <Form.Item label="KYC?" name="username">
+              <Form.Item label="KYC?" name="kyc">
                 <Checkbox
                   checked={!componentDisabled}
                   onChange={(e) => setComponentDisabled(!e.target.checked)}
@@ -82,7 +82,7 @@ const ModeratorButtons = () => {
             </Form>
           </Modal>
           <Button type="primary" onClick={showModal}>
-            Moderator options.
+            Moderator options
           </Button>
         </Card>
       )}

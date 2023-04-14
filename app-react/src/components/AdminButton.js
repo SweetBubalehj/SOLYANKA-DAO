@@ -14,49 +14,88 @@ const { Title, Text } = Typography;
 
 const AdminModeratorButtons = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAddingModerator, setIsAddingModerator] = useState(true);
   //Contract part
   const { address } = useAccount();
+
+  const [addr, setAddr] = useState("");
+
+  const { config: addModeratorConfig } = usePrepareContractWrite({
+    address: Address,
+    abi: ABI,
+    functionName: "addModerator",
+    args: [addr],
+  });
+
+  const { data: addModeratorData, write: addModerator } =
+    useContractWrite(addModeratorConfig);
+
+  const { config: removeModeratorConfig } = usePrepareContractWrite({
+    address: Address,
+    abi: ABI,
+    functionName: "removeModerator",
+    args: [addr],
+  });
+
+  const { data: removeModeratorData, write: removeModerator } =
+    useContractWrite(removeModeratorConfig);
 
   //Modal part
   const showModal = () => {
     setIsModalOpen(true);
   };
 
-  const handleOk = () => {
-    setIsModalOpen(false);
+  const handleAddModerator = () => {
+    setIsAddingModerator(true);
+    showModal();
   };
 
-  const handleCancel = () => {
-    setIsModalOpen(false);
+  const handleRemoveModerator = () => {
+    setIsAddingModerator(false);
+    showModal();
   };
+
+  const handleOk = () => {
+    setIsModalOpen(false);
+    if (isAddingModerator) {
+      addModerator?.();
+    } else {
+      removeModerator?.();
+    }
+  };
+
   //
 
   //Admin and Moderator part
   const isAdmin = useGetIsAdmin();
   //
   return (
-    <Card title="">
-      <Modal
-        title="Admin options"
-        open={isModalOpen}
-        onOk={handleOk}
-        onShow={showModal}
-        onCancel={handleCancel}
-      >
-        <Form>
-          <Form.Item
-            label="Username"
-            name="username"
-            rules={[{ required: true, message: "Please input your username!" }]}
+    <>
+      {isAdmin && (
+        <Card title="">
+          <Modal
+            title={isAddingModerator ? "Add moderator" : "Remove moderator"}
+            open={isModalOpen}
+            onOk={handleOk}
+            onCancel={() => setIsModalOpen(false)}
           >
-            <Input />
-          </Form.Item>
-        </Form>
-      </Modal>
-      <Button type="primary" onClick={showModal}>
-        Admin options
-      </Button>
-    </Card>
+            <Form>
+              <Form.Item label="Address" name="username">
+                <Input onChange={(e) => setAddr(e.target.value)} />
+              </Form.Item>
+            </Form>
+          </Modal>
+          <div>
+            <Button type="primary" onClick={handleAddModerator}>
+              Add moderator
+            </Button>
+            <Button type="primary" onClick={handleRemoveModerator}>
+              Remove moderator
+            </Button>
+          </div>
+        </Card>
+      )}
+    </>
   );
 };
 

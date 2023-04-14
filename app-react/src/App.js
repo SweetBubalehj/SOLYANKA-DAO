@@ -137,7 +137,8 @@ const App = () => {
           margin: "0 auto",
           padding: "50px",
           width: "100%",
-          maxWidth: "1500px"
+          maxWidth: "1500px",
+          height: "100vh",
         }}
       >
         <Row justify="center" gutter={[16, 16]}>
