@@ -14,6 +14,8 @@ import { GlobalOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import "./App.css";
 import IdentityInfoForm from "./components/IdentityInfo";
+import AdminButtons from "./components/AdminButton";
+import ModeratorButtons from "./components/ModeratorButton";
 
 const { Header, Content } = Layout;
 const { Title, Paragraph } = Typography;
@@ -75,6 +77,12 @@ const App = () => {
         <WagmiConfig client={wagmiClient}>
           <IdentityInfoForm />
         </WagmiConfig>
+        <WagmiConfig client={wagmiClient}>
+          <AdminButtons />
+        </WagmiConfig>
+        <WagmiConfig client={wagmiClient}>
+          <ModeratorButtons />
+        </WagmiConfig>
       </div>
     ),
   };
@@ -83,7 +91,10 @@ const App = () => {
     <Layout style={{ minWidth: "380px" }}>
       <Header>
         <Row justify="space-between" align="middle">
-          <Col sm={{ span: 7, offset: 1 }} style={{ display: "flex", alignItems: "center" }}>
+          <Col
+            sm={{ span: 7, offset: 1 }}
+            style={{ display: "flex", alignItems: "center" }}
+          >
             <GlobalOutlined
               style={{ fontSize: "20px", color: "white", marginRight: "8px" }}
             />
@@ -117,7 +128,7 @@ const App = () => {
           margin: "0 auto",
           padding: "50px",
           width: "100%",
-          maxWidth: "1500px"
+          maxWidth: "1500px",
         }}
       >
         <Row justify="center" gutter={[16, 16]}>

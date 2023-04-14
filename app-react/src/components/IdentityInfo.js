@@ -6,8 +6,6 @@ import {
   usePrepareContractWrite,
 } from "wagmi";
 import { Address, ABI } from "../contracts/sbtContract";
-import useGetIsModerator from "../utils/isModerator";
-import useGetIsAdmin from "../utils/isAdmin";
 import { Card, Typography, Modal, Form, Input, Button } from "antd";
 
 const { Title, Text } = Typography;
@@ -90,22 +88,6 @@ const IdentityInfo = () => {
   };
   //
 
-  //Admin and Moderator part
-  const isAdmin = useGetIsAdmin();
-  const isModerator = useGetIsModerator();
-
-  const handleAdminButtonClick = () => {
-    if (isAdmin) {
-      // Выполните действие, связанное с админской кнопкой
-    }
-  };
-
-  const handleModeratorButtonClick = () => {
-    if (isModerator) {
-      // Выполните действие, связанное с модераторской кнопкой
-    }
-  };
-  //
   return (
     <Card title="Your profile">
       {address && (
@@ -126,14 +108,8 @@ const IdentityInfo = () => {
       )}
       {address && !isLoading && (
         <Button type="primary" onClick={showModal}>
-          Edit profile.
+          Edit profile
         </Button>
-      )}
-      {isAdmin && (
-        <Button onClick={handleAdminButtonClick}>Admin button.</Button>
-      )}
-      {isModerator && (
-        <Button onClick={handleModeratorButtonClick}>Moderator button.</Button>
       )}
       <Modal
         title="Edit profile"
@@ -141,32 +117,6 @@ const IdentityInfo = () => {
         onOk={handleOk}
         onShow={showModal}
         okButtonProps={{ disabled: !(userName && userEmail && userAge) }}
-        onCancel={handleCancel}
-      >
-        <Form>
-          <Form.Item label="Username">
-            <Input
-              value={newUserName}
-              onChange={(e) => setNewUserName(e.target.value)}
-            />
-          </Form.Item>
-          <Form.Item label="Email">
-            <Input
-              value={newEmail}
-              onChange={(e) => setNewEmail(e.target.value)}
-            />
-          </Form.Item>
-          <Form.Item label="Age">
-            <Input value={newAge} onChange={(e) => setNewAge(e.target.value)} />
-          </Form.Item>
-        </Form>
-      </Modal>
-      <Modal
-        title="Edit profile" 
-        open={isModalOpen}
-        onOk={handleOk}
-        onShow={showModal}
-        // okButtonProps={{ disabled: !(userName && userEmail && userAge) }} <-- инфо может быть пустой стринг
         onCancel={handleCancel}
       >
         <Form>
