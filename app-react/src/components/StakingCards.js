@@ -68,9 +68,11 @@ const StakingCards = () => {
   });
   
   function myBalance() {
-    let balance;
+    let balance = 0;
     balance = _balance;
+    if(typeof balance !== 'undefined') {
     balance = fromWei(balance);
+    }
     console.log(balance);
     return balance;
   }
@@ -259,7 +261,7 @@ const StakingCards = () => {
     );
   }
 
-  if (!isUserKYC) {
+  if (!isUserKYC && isVerified) {
     return (
       <div
         style={{
@@ -344,7 +346,9 @@ const StakingCards = () => {
         </div>
       </div>
     );
-  } else {
+  } 
+  
+  if(isUserKYC && isVerified) {
     return (
       <div
         style={{
