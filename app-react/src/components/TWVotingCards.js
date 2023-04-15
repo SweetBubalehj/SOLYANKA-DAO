@@ -186,7 +186,7 @@ const TWVotingCards = () => {
   }, [searchQuery, titles, TWdata]);
 
   const showModal = (index) => {
-    if (index) {
+    if (index != undefined && index) {
       setSelectedProposal(null);
       setSelectedVoting(index);
       setIsModalVisible(true);
