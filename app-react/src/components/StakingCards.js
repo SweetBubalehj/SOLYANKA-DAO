@@ -439,14 +439,14 @@ const StakingCards = () => {
         </Col>
         <Modal
           footer={[
-            <Button key="Approve" onClick={handleApprove}>
-              Approve
-            </Button>,
-            <Button key="Stake" onClick={handleStake}>
-              Stake
-            </Button>,
             <Button key="Cancel" onClick={handleCancel}>
               Cancel
+            </Button>,
+            <Button type="primary" key="Approve" onClick={handleApprove}>
+              Approve
+            </Button>,
+            <Button type="primary" key="Stake" onClick={handleStake}>
+              Stake
             </Button>,
           ]}
           title="Staking"
@@ -454,27 +454,24 @@ const StakingCards = () => {
           onOk={handleOkStaking}
           onCancel={handleCancel}
         >
-          <Col xs={24} sm={8}>
-            <Col>
-              <Text>Staking tokens amount: </Text>
-            </Col>
-            <Col>
-              <InputNumber
-                style={{ marginLeft: "10px" }}
-                value={stakeAmount}
-                min={1}
-                max={10000}
-                onChange={handleStakeAmountChange}
-              />
-            </Col>
-          </Col>
+          <Text>Staking tokens amount: </Text>
+          <InputNumber
+            style={{ marginLeft: "10px" }}
+            value={stakeAmount}
+            min={1}
+            max={10000}
+            onChange={handleStakeAmountChange}
+          />
         </Modal>
         .
         <Modal
           title="Reward"
           open={isModalRewardOpen}
           footer={[
-            <Button key="GetReward" onClick={handleReward}>
+            <Button key="Cancel" onClick={handleCancel}>
+              Cancel
+            </Button>,
+            <Button type="primary" key="GetReward" onClick={handleReward}>
               Get Reward
             </Button>,
           ]}
@@ -485,8 +482,17 @@ const StakingCards = () => {
           open={isModalBalanceOpen}
           onOk={handleOkBalance}
           onCancel={handleCancel}
+          footer={[
+            <Button type="primary" key="Cancel" onClick={handleCancel}>
+              Ok
+            </Button>,
+          ]}
         >
-          {balance !== null ? <h1>{balance}</h1> : <p>Loading...</p>}
+          {balance !== undefined ? (
+            <h1>Tokens: {parseFloat(balance).toFixed(2)} SLK</h1>
+          ) : (
+            <h3>Loading...</h3>
+          )}
         </Modal>
       </Row>
     );
