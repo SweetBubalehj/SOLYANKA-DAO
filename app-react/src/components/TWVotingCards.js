@@ -127,8 +127,6 @@ const TWVotingCards = () => {
     args: [userAddress, TWdata?.[selectedVoting]],
   });
 
-  console.log(Number(allowanceInfo) > voteWeight + 10000);
-
   const { config: voteConfig } = usePrepareContractWrite({
     address: TWdata?.[selectedVoting],
     abi: TWvotingABI,
@@ -188,10 +186,12 @@ const TWVotingCards = () => {
   }, [searchQuery, titles, TWdata]);
 
   const showModal = (index) => {
-    setSelectedProposal(null);
-    setSelectedVoting(index);
-    setIsModalVisible(true);
-    getTimestamp();
+    if (index) {
+      setSelectedProposal(null);
+      setSelectedVoting(index);
+      setIsModalVisible(true);
+      getTimestamp();
+    }
   };
 
   const handleCancel = () => {
