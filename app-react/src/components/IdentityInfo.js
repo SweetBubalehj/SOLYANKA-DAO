@@ -6,7 +6,18 @@ import {
   usePrepareContractWrite,
 } from "wagmi";
 import { Address, ABI } from "../contracts/sbtContract";
-import { Card, Typography, Modal, Form, Input, Button } from "antd";
+import {
+  Card,
+  Typography,
+  Modal,
+  Form,
+  Input,
+  Button,
+  Space,
+  Spin,
+  Alert,
+} from "antd";
+import useCheckIdentity from "../utils/isIdentified";
 
 const { Title, Text } = Typography;
 
@@ -17,6 +28,8 @@ const IdentityInfo = () => {
   const [newUserName, setNewUserName] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newAge, setNewAge] = useState(13);
+
+  const isVerified = useCheckIdentity();
 
   const { config } = usePrepareContractWrite({
     address: Address,
@@ -80,13 +93,38 @@ const IdentityInfo = () => {
 
   const handleOk = () => {
     write?.(userName, userEmail, Number(userAge));
-    setIsModalOpen(false);
+    //setIsModalOpen(false);
   };
 
   const handleCancel = () => {
     setIsModalOpen(false); // Fixed typo
   };
   //
+
+  if (isVerified === undefined) {
+    return (
+      <Space
+        direction="vertical"
+        style={{ width: "100%", marginBottom: "50px" }}
+      >
+        <Spin tip="Awaiting Wallet" size="large">
+          <div />
+        </Spin>
+      </Space>
+    );
+  }
+
+  if (!isVerified) {
+    return (
+      <Alert
+        style={{ width: "100%", marginBottom: "50px" }}
+        message="You are not registered"
+        description="Please identify yourself to use application."
+        type="warning"
+        showIcon
+      />
+    );
+  }
 
   return (
     <Card title="Your profile">
@@ -116,7 +154,7 @@ const IdentityInfo = () => {
         open={isModalOpen}
         onOk={handleOk}
         onShow={showModal}
-        okButtonProps={{ disabled: !(userName && userEmail && userAge) }}
+        //okButtonProps={{ disabled: !(userName && userEmail && userAge) }} <= бывает пустой стринг
         onCancel={handleCancel}
       >
         <Form>

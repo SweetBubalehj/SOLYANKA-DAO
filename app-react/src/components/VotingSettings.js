@@ -70,11 +70,11 @@ const VotingSettings = ({ votingAddress, isPrivate }) => {
   } = useContractWrite(whitelistConfig);
 
   useEffect(() => {
-    if (titleLoading || durationLoading) {
+    if (titleLoading || durationLoading || whitelistLoading) {
       transactionIsLoading();
     }
 
-    if (titleSuccess || durationSuccess) {
+    if (titleSuccess || durationSuccess || whitelistSuccess) {
       transactionIsSuccess();
     }
   }, [
@@ -123,8 +123,7 @@ const VotingSettings = ({ votingAddress, isPrivate }) => {
             </Form.Item>
           </Form>
           <Divider />
-          <Form></Form>
-          <Form>
+          <Form layout="vertical">
             <Form.Item>
               <div
                 style={{
@@ -172,7 +171,7 @@ const VotingSettings = ({ votingAddress, isPrivate }) => {
                       <>
                         {_fields.map((_field, index) => (
                           <Form.Item
-                            label={index === 0 ? "Addresses" : ""}
+                            label={index === 0 ? "Add addresses to whitelist" : ""}
                             tooltip={
                               index === 0 ? "Addresses of the voting" : ""
                             }

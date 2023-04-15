@@ -16,7 +16,9 @@ import {
   Typography,
   Row,
   Col,
+  Progress,
   notification,
+  Divider,
 } from "antd";
 import {
   Address as factoryAddress,
@@ -102,6 +104,12 @@ const VotingList = () => {
     address: data?.[selectedVoting],
     abi: votingABI,
     functionName: "getProposalsNames",
+  });
+
+  const { data: proposalVotes } = useContractRead({
+    address: data?.[selectedVoting],
+    abi: votingABI,
+    functionName: "getProposalsVotes",
   });
 
   const { data: isContractKYC } = useContractRead({
@@ -224,6 +232,15 @@ const VotingList = () => {
     );
   }
 
+  const calculatePercentage = (votes, totalVotes) => {
+    return (votes / totalVotes) * 100;
+  };
+
+  const totalVotes = proposalVotes?.reduce(
+    (acc, votes) => acc + Number(votes),
+    0
+  );
+
   if (isUserVerified === undefined) {
     return;
   }
@@ -238,7 +255,7 @@ const VotingList = () => {
         return (
           <Alert
             message="Error"
-            description="Ended with a tie or not enough quorum."
+            description="Voting results ended with a tie."
             type="error"
             showIcon
           />
@@ -273,7 +290,13 @@ const VotingList = () => {
         <>
           <TimeRemaining />
           <br />
-          <Alert message="You have already voted." type="warning" showIcon />
+          <Alert
+            message={`You have already voted. Your choice is: ${
+              proposalNames[voters?.choice]
+            }`}
+            type="warning"
+            showIcon
+          />
         </>
       );
     }
@@ -395,6 +418,25 @@ const VotingList = () => {
             <VotingModeration votingAddress={data?.[selectedVoting]} />
           )}
         {renderModalContent()}
+        <Divider />
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          {proposalVotes?.map((votes, index) => (
+            <div key={index} style={{ width: "85%" }}>
+              <Text>Proposal {proposalNames?.[index]}:</Text>
+              <Progress
+                percent={calculatePercentage(votes, totalVotes)}
+                format={(percent) => `${percent.toFixed(2)}%`}
+              />
+            </div>
+          ))}
+        </div>
+
         <Row justify="center" style={{ marginTop: "20px" }}>
           <Col>
             <Text type="secondary" style={{ textAlign: "center" }}>

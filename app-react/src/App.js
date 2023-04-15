@@ -78,20 +78,30 @@ const App = () => {
         <WagmiConfig client={wagmiClient}>
           <StakingCards />
         </WagmiConfig>
+
+        <WagmiConfig client={wagmiClient}>
+          <CreateIdentityForm />
+        </WagmiConfig>
       </>
     ),
     profile: (
-      <div style={{ textAlign: "center" }}>
+      <>
         <WagmiConfig client={wagmiClient}>
           <IdentityInfoForm />
         </WagmiConfig>
+        
         <WagmiConfig client={wagmiClient}>
           <AdminButtons />
         </WagmiConfig>
+
         <WagmiConfig client={wagmiClient}>
           <ModeratorButtons />
         </WagmiConfig>
-      </div>
+
+        <WagmiConfig client={wagmiClient}>
+          <CreateIdentityForm />
+        </WagmiConfig>
+      </>
     ),
   };
 
