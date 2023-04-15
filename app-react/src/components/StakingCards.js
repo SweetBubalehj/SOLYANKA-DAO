@@ -9,9 +9,14 @@ import {
   Col,
   Row,
   Typography,
-  notification
+  notification,
 } from "antd";
-import { useContractWrite, usePrepareContractWrite,useContractRead, useAccount } from "wagmi";
+import {
+  useContractWrite,
+  usePrepareContractWrite,
+  useContractRead,
+  useAccount,
+} from "wagmi";
 import {
   Address as stakingAddress,
   ABI as stakingABI,
@@ -27,11 +32,11 @@ import useCheckIdentity from "../utils/isIdentified";
 
 const { Text } = Typography;
 
-const toWei = (value) => ethers.utils.parseEther((value).toString());
+const toWei = (value) => ethers.utils.parseEther(value.toString());
 
 const fromWei = (value) =>
   ethers.utils.formatEther(
-    typeof value === "string" ? value : (value).toString()
+    typeof value === "string" ? value : value.toString()
   );
 
 const StakingCards = () => {
@@ -60,24 +65,24 @@ const StakingCards = () => {
     });
   };
 
-  const {data: _balance} = useContractRead({
+  const { data: _balance } = useContractRead({
     address: tokenAddress,
     abi: tokenABI,
     functionName: "balanceOf",
     args: [userAddress],
   });
-  
+
   function myBalance() {
     let balance = 0;
     balance = _balance;
-    if(typeof balance !== 'undefined') {
-    balance = fromWei(balance);
+    if (typeof balance !== "undefined") {
+      balance = fromWei(balance);
     }
     console.log(balance);
     return balance;
   }
 
-  const {config: approveConfig } = usePrepareContractWrite({
+  const { config: approveConfig } = usePrepareContractWrite({
     address: tokenAddress,
     abi: tokenABI,
     functionName: "approve",
@@ -97,7 +102,7 @@ const StakingCards = () => {
     }
   }
 
-  const {config: stakeConfig} = usePrepareContractWrite({
+  const { config: stakeConfig } = usePrepareContractWrite({
     address: stakingAddress,
     abi: stakingABI,
     functionName: "stakeToken",
@@ -109,7 +114,7 @@ const StakingCards = () => {
     write: stakeToken,
   } = useContractWrite(stakeConfig);
 
-  const {rewardConfig }= usePrepareContractWrite({
+  const { rewardConfig } = usePrepareContractWrite({
     address: stakingAddress,
     abi: stakingABI,
     functionName: "claimReward",
@@ -119,7 +124,6 @@ const StakingCards = () => {
     isSuccess: rewardSuccess,
     write: claimReward,
   } = useContractWrite(rewardConfig);
-
 
   function handleStakeAmountChange(newStakeAmount) {
     setStakeAmount(newStakeAmount);
@@ -137,49 +141,37 @@ const StakingCards = () => {
     if (approveLoading) {
       transactionIsLoading();
     }
-  }, [
-    approveLoading
-  ]);
+  }, [approveLoading]);
 
   useEffect(() => {
     if (approveSuccess) {
       transactionIsSuccess();
     }
-  }, [
-    approveSuccess
-  ]);
-  
+  }, [approveSuccess]);
+
   useEffect(() => {
     if (stakeLoading) {
       transactionIsLoading();
     }
-  }, [
-    stakeLoading
-  ]);
+  }, [stakeLoading]);
 
   useEffect(() => {
     if (stakeSuccess) {
       transactionIsSuccess();
     }
-  }, [
-    stakeSuccess
-  ]);
+  }, [stakeSuccess]);
 
   useEffect(() => {
     if (rewardLoading) {
       transactionIsLoading();
     }
-  }, [
-    rewardLoading
-  ]);
+  }, [rewardLoading]);
 
   useEffect(() => {
     if (rewardSuccess) {
       transactionIsSuccess();
     }
-  }, [
-    rewardSuccess
-  ]);
+  }, [rewardSuccess]);
 
   const showModalStaking = () => {
     if (isUserKYC) {
@@ -224,7 +216,6 @@ const StakingCards = () => {
   const handleOkStaking = () => {
     setIsModalStakingOpen(false);
   };
-
 
   const handleOkBalance = () => {
     setIsModalBalanceOpen(false);
@@ -281,15 +272,8 @@ const StakingCards = () => {
             showIcon
           />
         </div>
-        <div
-          disabled
-          style={{
-            backgroundColor: "#f5f5f5",
-            display: "flex",
-            flexDirection: "row",
-          }}
-        >
-          <div className="check" onClick={showModalStaking}>
+        <Row gutter={[16, 16]} justify="center">
+          <Col xs={24} sm={12} md={12} lg={8} xl={8} className="check" onClick={showModalStaking}>
             <svg
               style={{
                 backgroundColor: "lightblue",
@@ -306,8 +290,8 @@ const StakingCards = () => {
             <h2 style={{ fontFamily: "'Delicious Handrawn', cursive;" }}>
               Staking
             </h2>
-          </div>
-          <div className="check" onClick={showModalReward}>
+          </Col>
+          <Col xs={24} sm={12} md={12} lg={8} xl={8} className="check" onClick={showModalReward}>
             <svg
               style={{
                 backgroundColor: "lightgreen",
@@ -324,8 +308,8 @@ const StakingCards = () => {
             <h2 style={{ fontFamily: "'Delicious Handrawn', cursive;" }}>
               Get Reward
             </h2>
-          </div>
-          <div className="check" onClick={showModalBalance}>
+          </Col>
+          <Col xs={24} sm={12} md={12} lg={8} xl={8} className="check" onClick={showModalBalance}>
             <svg
               style={{
                 backgroundColor: "pink",
@@ -342,22 +326,16 @@ const StakingCards = () => {
             <h2 style={{ fontFamily: "'Delicious Handrawn', cursive;" }}>
               My balance
             </h2>
-          </div>
-        </div>
+          </Col>
+        </Row>
       </div>
     );
-  } 
-  
-  if(isUserKYC && isVerified) {
+  }
+
+  if (isUserKYC && isVerified) {
     return (
-      <div
-        style={{
-          backgroundColor: "#f5f5f5",
-          display: "flex",
-          flexDirection: "row",
-        }}
-      >
-        <div className="check" onClick={showModalStaking}>
+      <Row gutter={[16, 16]} justify="center">
+        <Col xs={24} sm={12} md={12} lg={8} xl={8} className="check" onClick={showModalStaking}>
           <svg
             style={{
               backgroundColor: "lightblue",
@@ -374,8 +352,8 @@ const StakingCards = () => {
           <h2 style={{ fontFamily: "'Delicious Handrawn', cursive;" }}>
             Staking
           </h2>
-        </div>
-        <div className="check" onClick={showModalReward}>
+        </Col>
+        <Col xs={24} sm={12} md={12} lg={8} xl={8} className="check" onClick={showModalReward}>
           <svg
             style={{
               backgroundColor: "lightgreen",
@@ -392,8 +370,8 @@ const StakingCards = () => {
           <h2 style={{ fontFamily: "'Delicious Handrawn', cursive;" }}>
             Get Reward
           </h2>
-        </div>
-        <div className="check" onClick={showModalBalance}>
+        </Col>
+        <Col  xs={24} sm={12} md={12} lg={8} xl={8} className="check" onClick={showModalBalance}>
           <svg
             style={{
               backgroundColor: "pink",
@@ -410,7 +388,7 @@ const StakingCards = () => {
           <h2 style={{ fontFamily: "'Delicious Handrawn', cursive;" }}>
             My balance
           </h2>
-        </div>
+        </Col>
         <Modal
           footer={[
             <Button key="Approve" onClick={handleApprove}>
@@ -428,20 +406,20 @@ const StakingCards = () => {
           onOk={handleOkStaking}
           onCancel={handleCancel}
         >
-          <Row justify="center" align="middle">
+          <Col xs={24} sm={8}>
             <Col>
               <Text>Staking tokens amount: </Text>
             </Col>
             <Col>
               <InputNumber
-              style={{marginLeft: "10px"}}
+                style={{ marginLeft: "10px" }}
                 value={stakeAmount}
                 min={1}
                 max={10000}
                 onChange={handleStakeAmountChange}
               />
             </Col>
-          </Row>
+          </Col>
         </Modal>
         .
         <Modal
@@ -462,7 +440,7 @@ const StakingCards = () => {
         >
           {balance !== null ? <h1>{balance}</h1> : <p>Loading...</p>}
         </Modal>
-      </div>
+      </Row>
     );
   }
 };

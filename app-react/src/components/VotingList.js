@@ -416,7 +416,7 @@ const VotingList = () => {
       <Spin spinning={loading}>
         <Row gutter={[16, 16]} style={{ marginTop: "40px" }}>
           {filteredList.map((item, index) => (
-            <Col xs={24} sm={12} md={8} lg={8} xl={8} key={item.index}>
+            <Col xs={24} sm={24} md={12} lg={12} xl={8} key={item.index}>
               <Card hoverable>
                 <div
                   style={{

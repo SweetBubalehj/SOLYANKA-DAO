@@ -1,4 +1,4 @@
-import { Layout, Typography, Menu, Col, Row,Input, QRCode, Space } from "antd";
+import { Layout, Typography, Menu, Col, Row, Input, QRCode, Space } from "antd";
 import "@rainbow-me/rainbowkit/styles.css";
 import { ConnectButton, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { WagmiConfig } from "wagmi";
@@ -18,7 +18,7 @@ import StakingCards from "./components/StakingCards";
 import AdminButtons from "./components/AdminButton";
 import ModeratorButtons from "./components/ModeratorButton";
 
-const { Header, Content } = Layout;
+const { Header, Content, Footer } = Layout;
 const { Title, Paragraph } = Typography;
 
 const { chains, provider } = configureChains(
@@ -46,19 +46,35 @@ const wagmiClient = createClient({
 
 const App = () => {
   const [contentKey, setContentKey] = useState("welcome");
-  const [text, setText] = useState('https://1000.menu/cooking/13122-myasnaya-sbornaya-solyanka-s-kartoshkoj');
+  const [text, setText] = useState(
+    "https://1000.menu/cooking/13122-myasnaya-sbornaya-solyanka-s-kartoshkoj"
+  );
 
   const menuContent = {
     welcome: (
-      <div style={{display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "center"}}>
-        <Title code level={3}>function Welcome_To_SolyankaDAO(attention) public view returns (respect)</Title>
-        <Paragraph style={{fontSize: "14pt"}} code level={2}>
-          print("This is the home page of SOLYANKA DAO. Click on the "Votings" menu
-          item to access the main features. Click "Profile" to go to your
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <Title code level={3}>
+          function Welcome_To_SolyankaDAO(attention) public view returns
+          (respect)
+        </Title>
+        <Paragraph style={{ fontSize: "14pt" }} code level={2}>
+          print("This is the home page of SOLYANKA DAO. Click on the "Votings"
+          menu item to access the main features. Click "Profile" to go to your
           profile.");
         </Paragraph>
-        <Space style={{height: "100%"}}  direction="vertical" align="center">
-        <QRCode size={430} icon="https://genshin-info.ru/upload/resize_cache/iblock/1e7/256_256_1d7a58ff99b324185ccb5ad5dfbdb5e85/Strannaya-solyanka-Arkhonta.png"  value={text || '-'} />
+        <Space style={{ height: "100%" }} direction="vertical" align="center">
+          <QRCode
+            size={430}
+            icon="https://genshin-info.ru/upload/resize_cache/iblock/1e7/256_256_1d7a58ff99b324185ccb5ad5dfbdb5e85/Strannaya-solyanka-Arkhonta.png"
+            value={text || "-"}
+          />
         </Space>
       </div>
     ),
@@ -93,7 +109,7 @@ const App = () => {
         <WagmiConfig client={wagmiClient}>
           <IdentityInfoForm />
         </WagmiConfig>
-        
+
         <WagmiConfig client={wagmiClient}>
           <AdminButtons />
         </WagmiConfig>
@@ -110,7 +126,7 @@ const App = () => {
   };
 
   return (
-    <Layout style={{ minWidth: "380px" }}>
+    <Layout style={{ minWidth: "380px", minHeight: "100vh" }}>
       <Header>
         <Row justify="space-between" align="middle">
           <Col
@@ -147,12 +163,14 @@ const App = () => {
         </Row>
       </Header>
       <Content
+        className="site-layout"
         style={{
           margin: "0 auto",
-          padding: "50px",
-          width: "100%",
+          padding: 24,
+          minHeight: 360,
+          background: "#ffffff",
+          width: "90%",
           maxWidth: "1500px",
-          minHeight: "100vh"
         }}
       >
         <Row justify="center" gutter={[16, 16]}>
@@ -161,6 +179,11 @@ const App = () => {
           </Col>
         </Row>
       </Content>
+      <Footer style={{ textAlign: "center" }}>
+        SOLYANKA Token Address:
+        <br />
+        SOLYANKA DAO ©2023
+      </Footer>
     </Layout>
   );
 };
