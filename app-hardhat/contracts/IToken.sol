@@ -15,4 +15,6 @@ interface IToken {
         address recipient,
         uint256 amount
     ) external returns (uint256);
+
+    function decimals() external view returns (uint8);
 }
