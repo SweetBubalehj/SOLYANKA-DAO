@@ -16,6 +16,7 @@ import {
   usePrepareContractWrite,
   useContractRead,
   useAccount,
+  useBlockNumber,
 } from "wagmi";
 import {
   Address as stakingAddress,
@@ -50,6 +51,7 @@ const StakingCards = () => {
   const { address: userAddress } = useAccount();
 
   const isVerified = useCheckIdentity();
+  const { data: blockNumber } = useBlockNumber();
 
   const transactionIsSuccess = () => {
     notification.success({
@@ -70,6 +72,12 @@ const StakingCards = () => {
     abi: tokenABI,
     functionName: "balanceOf",
     args: [userAddress],
+  });
+
+  const { data: endTime } = useContractRead({
+    address: stakingAddress,
+    abi: stakingABI,
+    functionName: "getTokenExpiry",
   });
 
   function myBalance() {
@@ -471,12 +479,37 @@ const StakingCards = () => {
             <Button key="Cancel" onClick={handleCancel}>
               Cancel
             </Button>,
-            <Button type="primary" key="GetReward" onClick={handleReward}>
+            <Button
+              disabled={
+                endTime == undefined || (endTime && endTime < blockNumber)
+              }
+              type="primary"
+              key="GetReward"
+              onClick={handleReward}
+            >
               Get Reward
             </Button>,
           ]}
           onCancel={handleCancel}
-        ></Modal>
+        >
+          {endTime == undefined ? (
+            <Alert
+              message="Not participated"
+              description={"You are not participating in staking."}
+              type="warning"
+              showIcon
+            />
+          ) : (
+            endTime > blockNumber && (
+              <Alert
+                message="Not yet time"
+                description={"Staking time is not up."}
+                type="warning"
+                showIcon
+              />
+            )
+          )}
+        </Modal>
         <Modal
           title="Balance"
           open={isModalBalanceOpen}
