@@ -6,7 +6,6 @@ import {
   useAccount,
 } from "wagmi";
 import {
-  List,
   Modal,
   Select,
   Button,
@@ -16,9 +15,11 @@ import {
   Typography,
   Row,
   Col,
+  Card,
   Progress,
   notification,
   Divider,
+  Spin
 } from "antd";
 import {
   Address as factoryAddress,
@@ -32,6 +33,7 @@ import VotingSettings from "./VotingSettings";
 import useCheckKYC from "../utils/isKYC";
 import useGetIsModerator from "../utils/isModerator";
 import VotingModeration from "./VotingModeration";
+import getRandomGradient from "../utils/getRandomGradient";
 
 const { Text, Title } = Typography;
 
@@ -43,6 +45,9 @@ const VotingList = () => {
   const [titles, setTitles] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [kycStatuses, setKycStatuses] = useState([]);
+  const [privateStatuses, setPrivateStatuses] = useState([]);
+  const [gradients, setGradients] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const isUserVerified = useCheckIdentity();
@@ -207,6 +212,31 @@ const VotingList = () => {
       fetchTitlesAndKycStatuses();
     }
   }, [data]);
+
+  useEffect(() => {
+    if (data) {
+      const fetchTitlesAndPrivateStatuses = async () => {
+        const newTitles = [];
+        const newPrivateStatuses = [];
+        for (const address of data) {
+          const contract = new ethers.Contract(address, votingABI, provider);
+          const title = await contract.title();
+          const kycStatus = await contract.isPrivate();
+          newTitles.push(title);
+          newPrivateStatuses.push(kycStatus);
+        }
+        setTitles(newTitles);
+        setPrivateStatuses(newPrivateStatuses);
+        setLoading(false);
+      };
+      fetchTitlesAndPrivateStatuses();
+    }
+  }, [data]);
+
+  useEffect(() => {
+    const newGradients = filteredList.map(() => getRandomGradient());
+    setGradients(newGradients);
+  }, [filteredList]);
 
   useEffect(() => {
     if (isLoading) {
@@ -375,7 +405,7 @@ const VotingList = () => {
   return (
     <>
       <Title level={3} style={{ margin: "10px auto", textAlign: "center" }}>
-        Voting list
+        Votings
       </Title>
       <Input
         placeholder="Search by title or address"
@@ -383,14 +413,43 @@ const VotingList = () => {
         onChange={(e) => setSearchQuery(e.target.value)}
         allowClear
       />
-      <List
-        dataSource={filteredList}
-        renderItem={(item) => (
-          <List.Item>
-            <List.Item.Meta
-              title={
-                <a onClick={() => showModal(item.index)}>
-                  {item.title}{" "}
+      <Spin spinning={loading}>
+        <Row gutter={[16, 16]} style={{ marginTop: "40px" }}>
+          {filteredList.map((item, index) => (
+            <Col xs={24} sm={12} md={8} lg={8} xl={8} key={item.index}>
+              <Card hoverable>
+                <div
+                  style={{
+                    width: "100%",
+                    height: "200px",
+                    borderRadius: "10px",
+                    background: gradients[index],
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexDirection: "column",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => showModal(item.index)}
+                >
+                  <Typography.Title level={4} style={{ color: "white" }}>
+                    {item.title}
+                  </Typography.Title>
+                </div>
+                <Card.Meta
+                  style={{ textAlign: "center", padding: "10px" }}
+                  description={`Voting contract at address: ${
+                    data[item.index]
+                  }`}
+                />
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-evenly",
+                    marginTop: "10px",
+                  }}
+                >
                   {kycStatuses[item.index] && (
                     <Switch
                       size="small"
@@ -399,13 +458,20 @@ const VotingList = () => {
                       defaultChecked
                     />
                   )}
-                </a>
-              }
-              description={`Voting contract at address: ${data[item.index]}`}
-            />
-          </List.Item>
-        )}
-      />
+                  {privateStatuses[item.index] && (
+                    <Switch
+                      size="small"
+                      checkedChildren="PRIVATE"
+                      disabled
+                      defaultChecked
+                    />
+                  )}
+                </div>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      </Spin>
 
       <Modal
         title={`Voting: ${titles[selectedVoting]}`}
