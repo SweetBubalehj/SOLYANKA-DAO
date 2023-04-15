@@ -17,6 +17,7 @@ import IdentityInfoForm from "./components/IdentityInfo";
 import StakingCards from "./components/StakingCards";
 import AdminButtons from "./components/AdminButton";
 import ModeratorButtons from "./components/ModeratorButton";
+import {Address} from "./contracts/tokenContract"
 
 const { Header, Content, Footer } = Layout;
 const { Title, Paragraph } = Typography;
@@ -180,7 +181,7 @@ const App = () => {
         </Row>
       </Content>
       <Footer style={{ textAlign: "center" }}>
-        SOLYANKA Token Address:
+        SOLYANKA Token Address: {Address}
         <br />
         SOLYANKA DAO ©2023
       </Footer>
