@@ -6,21 +6,6 @@
 // global scope, and execute the script.
 const hre = require("hardhat");
 
-async function verify(contractAddress, arguments) {
-  try {
-    await run("verify:verify", {
-      address: contractAddress,
-      constructorArguments: [arguments],
-    });
-  } catch (e) {
-    if (e.message.toLowerCase.includes("already verified")) {
-      console.log("The contract already verified.");
-    } else {
-      console.log(e);
-    }
-  }
-}
-
 async function main() {
   const SBTArgs = ["Solyanka SBT", "Bubaleh", "...@gmail.com", 21];
   const SBToken = await hre.ethers.getContractFactory("SBToken");
@@ -50,23 +35,6 @@ async function main() {
   await VotingFactoryContract.deployed();
   console.log(`Voting Factory deployed to ${VotingFactoryContract.address}`);
 
-  if (network.config.chainId === 97) {
-    SBTContract.deployTransaction.wait(15);
-    verify(SBTContract.address, [SBTArgs]);
-    console.log("SBT Contract verified!");
-
-    SolyankaTokenContract.deployTransaction.wait(15);
-    verify(SolyankaTokenContract.address, []);
-    console.log("Solyanka Token Contract verified!");
-
-    StakingContract.deployTransaction.wait(15);
-    verify(StakingContract.address, [StakingArgs]);
-    console.log("Staking Contract verified!");
-
-    VotingFactoryContract.deployTransaction.wait(15);
-    verify(VotingFactoryContract.address, [VotingFactoryArgs]);
-    console.log("Voting Factory Contract verified!");
-  }
 }
 
 // We recommend this pattern to be able to use async/await everywhere

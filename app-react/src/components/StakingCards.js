@@ -44,14 +44,20 @@ const StakingCards = () => {
   const [isModalStakingOpen, setIsModalStakingOpen] = useState(false);
   const [isModalRewardOpen, setisModalRewardOpen] = useState(false);
   const [isModalBalanceOpen, setIsModalBalanceOpen] = useState(false);
+  const [currentTimestamp, setCurrentTimestamp] = useState(null);
   const [balance, setBalance] = useState(null);
   const [stakeAmount, setStakeAmount] = useState(1);
-  const [isApproved, setIsApproved] = useState(false);
   const isUserKYC = useCheckKYC();
   const { address: userAddress } = useAccount();
 
   const isVerified = useCheckIdentity();
-  const { data: blockNumber } = useBlockNumber();
+
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+
+  const getBlockTimestamp = async () => {
+    const block = await provider.getBlock();
+    setCurrentTimestamp(block.timestamp);
+  };
 
   const transactionIsSuccess = () => {
     notification.success({
@@ -74,11 +80,27 @@ const StakingCards = () => {
     args: [userAddress],
   });
 
-  const { data: endTime } = useContractRead({
+  const { data: allowanceInfo } = useContractRead({
+    address: tokenAddress,
+    abi: tokenABI,
+    functionName: "allowance",
+    args: [userAddress, stakingAddress],
+  });
+
+  const { data: addressStaked } = useContractRead({
     address: stakingAddress,
     abi: stakingABI,
-    functionName: "getTokenExpiry",
+    functionName: "addressStaked",
+    args: [userAddress],
   });
+
+  const { data: stakeInfo } = useContractRead({
+    address: stakingAddress,
+    abi: stakingABI,
+    functionName: "stakeInfos",
+    args: [userAddress],
+  });
+
 
   function myBalance() {
     let balance = 0;
@@ -94,7 +116,7 @@ const StakingCards = () => {
     address: tokenAddress,
     abi: tokenABI,
     functionName: "approve",
-    args: [stakingAddress, toWei(stakeAmount)],
+    args: stakeAmount ? [stakingAddress, toWei(stakeAmount)] : [],
   });
   const {
     isLoading: approveLoading,
@@ -114,7 +136,7 @@ const StakingCards = () => {
     address: stakingAddress,
     abi: stakingABI,
     functionName: "stakeToken",
-    args: [toWei(stakeAmount)],
+    args: stakeAmount ? [toWei(stakeAmount)] : [],
   });
   const {
     isLoading: stakeLoading,
@@ -136,6 +158,8 @@ const StakingCards = () => {
   function handleStakeAmountChange(newStakeAmount) {
     setStakeAmount(newStakeAmount);
   }
+
+  console.log(currentTimestamp);
 
   useEffect(() => {
     function updateBalance() {
@@ -170,6 +194,10 @@ const StakingCards = () => {
   }, [stakeSuccess]);
 
   useEffect(() => {
+    getBlockTimestamp();
+  }, []);
+
+  useEffect(() => {
     if (rewardLoading) {
       transactionIsLoading();
     }
@@ -187,11 +215,6 @@ const StakingCards = () => {
     }
   };
 
-  const handleApprove = () => {
-    approveTokenIn(stakeAmount);
-    setIsApproved(true);
-  };
-
   const handleReward = () => {
     try {
       claimReward?.();
@@ -202,11 +225,11 @@ const StakingCards = () => {
   };
 
   const handleStake = () => {
-    if (isApproved) {
-      stakeToken?.();
-    } else {
-      console.log("you should approve it first");
-    }
+    stakeToken?.();
+  };
+
+  const handleApprove = () => {
+    approve?.();
   };
 
   const showModalReward = () => {
@@ -453,7 +476,16 @@ const StakingCards = () => {
             <Button type="primary" key="Approve" onClick={handleApprove}>
               Approve
             </Button>,
-            <Button type="primary" key="Stake" onClick={handleStake}>
+            <Button
+              type="primary"
+              key="Stake"
+              disabled={
+                stakeAmount &&
+                allowanceInfo &&
+                stakeAmount > fromWei(allowanceInfo)
+              }
+              onClick={handleStake}
+            >
               Stake
             </Button>,
           ]}
@@ -470,6 +502,18 @@ const StakingCards = () => {
             max={10000}
             onChange={handleStakeAmountChange}
           />
+          {stakeAmount &&
+            allowanceInfo &&
+            stakeAmount > fromWei(allowanceInfo) && (
+              <Col xs={24} style={{ marginTop: "16px" }}>
+                <Alert
+                  message="Please approve tokens"
+                  description="Staking amount is greater than your allowance."
+                  type="error"
+                  showIcon
+                />
+              </Col>
+            )}
         </Modal>
         .
         <Modal
@@ -480,9 +524,7 @@ const StakingCards = () => {
               Cancel
             </Button>,
             <Button
-              disabled={
-                endTime == undefined || (endTime && endTime < blockNumber)
-              }
+              disabled={stakeInfo?.endTS < currentTimestamp}
               type="primary"
               key="GetReward"
               onClick={handleReward}
@@ -492,7 +534,7 @@ const StakingCards = () => {
           ]}
           onCancel={handleCancel}
         >
-          {endTime == undefined ? (
+          {stakeInfo?.endTS == undefined ? (
             <Alert
               message="Not participated"
               description={"You are not participating in staking."}
@@ -500,7 +542,7 @@ const StakingCards = () => {
               showIcon
             />
           ) : (
-            endTime > blockNumber && (
+            stakeInfo?.endTS > currentTimestamp && (
               <Alert
                 message="Not yet time"
                 description={"Staking time is not up."}

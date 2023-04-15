@@ -196,41 +196,25 @@ const VotingCards = () => {
 
   useEffect(() => {
     if (data) {
-      const fetchTitlesAndKycStatuses = async () => {
+      const fetchTitlesPrivateKycStatuses = async () => {
         const newTitles = [];
         const newKycStatuses = [];
-        for (const address of data) {
-          const contract = new ethers.Contract(address, votingABI, provider);
-          const title = await contract.title();
-          const kycStatus = await contract.isKYC();
-          newTitles.push(title);
-          newKycStatuses.push(kycStatus);
-        }
-        setTitles(newTitles);
-        setKycStatuses(newKycStatuses);
-      };
-      fetchTitlesAndKycStatuses();
-    }
-  }, [data]);
- 
-  //here here here
-  useEffect(() => {
-    if (data) {
-      const fetchTitlesAndPrivateStatuses = async () => {
-        const newTitles = [];
         const newPrivateStatuses = [];
         for (const address of data) {
           const contract = new ethers.Contract(address, votingABI, provider);
           const title = await contract.title();
-          const kycStatus = await contract.isPrivate();
+          const kycStatus = await contract.isKYC();
+          const privateStatus = await contract.isPrivate();
           newTitles.push(title);
-          newPrivateStatuses.push(kycStatus);
+          newKycStatuses.push(kycStatus);
+          newPrivateStatuses.push(privateStatus);
         }
         setTitles(newTitles);
-        setPrivateStatuses(newPrivateStatuses);
+        setKycStatuses(newKycStatuses);
         setLoading(false);
+        setPrivateStatuses(newPrivateStatuses);
       };
-      fetchTitlesAndPrivateStatuses();
+      fetchTitlesPrivateKycStatuses();
     }
   }, [data]);
 
@@ -405,9 +389,15 @@ const VotingCards = () => {
 
   return (
     <>
-      <Title level={3} style={{ margin: "10px auto", textAlign: "center" }}>
-        Classic Votings
-      </Title>
+      <h1
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        Classic Voting
+      </h1>
       <Input
         placeholder="Search by title or address"
         value={searchQuery}
@@ -415,7 +405,10 @@ const VotingCards = () => {
         allowClear
       />
       <Spin spinning={loading}>
-        <Row gutter={[16, 16]} style={{ marginTop: "40px" }}>
+        <Row
+          gutter={[16, 16]}
+          style={{ marginTop: "40px", marginBottom: "15px" }}
+        >
           {filteredList.map((item, index) => (
             <Col xs={24} sm={24} md={12} lg={12} xl={8} key={item.index}>
               <Card hoverable>

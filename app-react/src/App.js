@@ -1,4 +1,13 @@
-import { Layout, Typography, Menu, Col, Row, Input, QRCode, Space } from "antd";
+import {
+  Layout,
+  Typography,
+  Menu,
+  Col,
+  Row,
+  Collapse,
+  QRCode,
+  Space,
+} from "antd";
 import "@rainbow-me/rainbowkit/styles.css";
 import { ConnectButton, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { WagmiConfig } from "wagmi";
@@ -23,6 +32,7 @@ import CreateTWVotingForm from "./components/CreateTWVotinForm";
 
 const { Header, Content, Footer } = Layout;
 const { Title, Paragraph } = Typography;
+const { Panel } = Collapse;
 
 const { chains, provider } = configureChains(
   [bscTestnet],
@@ -68,13 +78,13 @@ const App = () => {
           (respect)
         </Title>
         <Paragraph style={{ fontSize: "14pt" }} code level={2}>
-          print("This is the home page of SOLYANKA DAO. Click on the "Votings"
-          menu item to access the main features. Click "Profile" to go to your
-          profile.");
+          console.log("This is the home page of SOLYANKA DAO. Click on the
+          "Votings" menu item to access the main features. Click "Profile" to go
+          to your profile.");
         </Paragraph>
         <Space style={{ height: "100%" }} direction="vertical" align="center">
           <QRCode
-            size={430}
+            size={330}
             icon="https://genshin-info.ru/upload/resize_cache/iblock/1e7/256_256_1d7a58ff99b324185ccb5ad5dfbdb5e85/Strannaya-solyanka-Arkhonta.png"
             value={text || "-"}
           />
@@ -91,15 +101,14 @@ const App = () => {
           <CreateTWVotingForm />
         </WagmiConfig>
 
-
         <WagmiConfig client={wagmiClient}>
           <TWVotingCards />
         </WagmiConfig>
-
+        
         <WagmiConfig client={wagmiClient}>
           <VotingCards />
         </WagmiConfig>
-        
+
         <WagmiConfig client={wagmiClient}>
           <CreateIdentityForm />
         </WagmiConfig>
@@ -142,7 +151,12 @@ const App = () => {
       <Header>
         <Row justify="space-between" align="middle">
           <Col
-            sm={{ span: 7, offset: 1 }}
+            xs={12}
+            sm={8}
+            md={8}
+            lg={8}
+            xl={9}
+            xxl={10}
             style={{ display: "flex", alignItems: "center" }}
           >
             <GlobalOutlined
@@ -152,7 +166,7 @@ const App = () => {
               SOLYANKA DAO
             </Title>
           </Col>
-          <Col sm={6}>
+          <Col xs={4} sm={11} md={10} lg={10} xl={10} xxl={10}>
             <Menu
               defaultSelectedKeys={["welcome"]}
               theme="dark"
@@ -165,7 +179,7 @@ const App = () => {
               <Menu.Item key="profile">Profile</Menu.Item>
             </Menu>
           </Col>
-          <Col sm={5}>
+          <Col xs={8} sm={5} md={6} lg={6} xl={5} xxl={4}>
             <WagmiConfig client={wagmiClient}>
               <RainbowKitProvider chains={chains}>
                 <ConnectButton />

@@ -21,6 +21,8 @@ import {
   Divider,
   Spin,
   InputNumber,
+  Space,
+  Collapse,
 } from "antd";
 import {
   Address as factoryAddress,
@@ -41,6 +43,8 @@ import getRandomGradient from "../utils/getRandomGradient";
 
 const { Text, Title } = Typography;
 
+const { Panel } = Collapse;
+
 const toWei = (value) => ethers.utils.parseEther(value.toString());
 
 const fromWei = (value) =>
@@ -57,6 +61,7 @@ const TWVotingCards = () => {
   const [voteWeight, setVoteWeight] = useState(1);
   const [titles, setTitles] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const isUserVerified = useCheckIdentity();
@@ -131,15 +136,26 @@ const TWVotingCards = () => {
     address: TWdata?.[selectedVoting],
     abi: TWvotingABI,
     functionName: "vote",
-    args: [toWei(voteWeight), selectedProposal],
+    args: voteWeight ? [toWei(voteWeight), selectedProposal] : [],
   });
   const { isLoading, isSuccess, write: vote } = useContractWrite(voteConfig);
+
+  const { config: claimTokensConfig } = usePrepareContractWrite({
+    address: TWdata?.[selectedVoting],
+    abi: TWvotingABI,
+    functionName: "claimTokens",
+  });
+  const {
+    isLoading: claimTokensLoading,
+    isSuccess: claimTokensSuccess,
+    write: claimTokens,
+  } = useContractWrite(claimTokensConfig);
 
   const { config: approveConfig } = usePrepareContractWrite({
     address: tokenAddress,
     abi: tokenABI,
     functionName: "approve",
-    args: [TWdata?.[selectedVoting], toWei(voteWeight)],
+    args: voteWeight ? [TWdata?.[selectedVoting], toWei(voteWeight)] : [],
   });
   const {
     isLoading: approveLoading,
@@ -205,10 +221,10 @@ const TWVotingCards = () => {
   }, [filteredList]);
 
   useEffect(() => {
-    if (isLoading) {
+    if (isLoading || claimTokensLoading || approveLoading) {
       transactionIsLoading();
     }
-  }, [isLoading]);
+  }, [isLoading, claimTokensLoading, approveLoading]);
 
   useEffect(() => {
     if (isSuccess) {
@@ -226,6 +242,7 @@ const TWVotingCards = () => {
           newTitles.push(title);
         }
         setTitles(newTitles);
+        setLoading(false);
       };
       fetchTitles();
     }
@@ -316,7 +333,7 @@ const TWVotingCards = () => {
     return (
       <>
         <TimeRemaining />
-        <br />
+        <Divider />
 
         <Select
           value={selectedProposal}
@@ -390,62 +407,88 @@ const TWVotingCards = () => {
 
   return (
     <>
-      <Title level={3} style={{ margin: "10px auto", textAlign: "center" }}>
-        Token Weighted Votings
-      </Title>
-      <Input
-        placeholder="Search by title or address"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        allowClear
-      />
-      <Row gutter={[16, 16]} style={{ marginTop: "40px" }}>
-        {filteredList.map((item, index) => (
-          <Col xs={24} sm={24} md={12} lg={12} xl={8} key={item.index}>
-            <Card hoverable>
-              <div
-                style={{
-                  width: "100%",
-                  height: "200px",
-                  borderRadius: "10px",
-                  background: gradients[index],
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexDirection: "column",
-                  cursor: "pointer",
-                }}
-                onClick={() => showModal(item.index)}
-              >
-                <Typography.Title level={4} style={{ color: "white" }}>
-                  {item.title}
-                </Typography.Title>
-              </div>
-              <Card.Meta
-                style={{ textAlign: "center", padding: "10px" }}
-                description={`Voting contract at address: ${
-                  TWdata[item.index]
-                }`}
-              />
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-evenly",
-                  marginTop: "10px",
-                }}
-              >
-                <Switch
-                  size="small"
-                  checkedChildren="KYC"
-                  disabled
-                  defaultChecked
-                />
-              </div>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+      <Collapse
+        className="custom-collapse"
+        style={{
+          marginTop: "20px",
+          marginBottom: "20px",
+          backgroundColor: "#fbd9d3",
+          borderColor: "#fbd9d3",
+        }}
+        accordion
+      >
+        <Panel header="Token Weighted Votings" key="1">
+          <h1
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginTop: "0",
+            }}
+          >
+            Token Weighted Votings
+          </h1>
+          <Input
+            placeholder="Search by title or address"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            allowClear
+            style={{ borderColor: "#fbd9d3" }}
+          />
+          <Spin spinning={loading}>
+            <Row
+              gutter={[16, 16]}
+              style={{ marginTop: "40px", marginBottom: "15px" }}
+            >
+              {filteredList.map((item, index) => (
+                <Col xs={24} sm={24} md={12} lg={12} xl={8} key={item.index}>
+                  <Card style={{ backgroundColor: "#fbd9d3" }} hoverable>
+                    <div
+                      style={{
+                        width: "100%",
+                        height: "200px",
+                        borderRadius: "10px",
+                        background: gradients[index],
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexDirection: "column",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => showModal(item.index)}
+                    >
+                      <Typography.Title level={4} style={{ color: "white" }}>
+                        {item.title}
+                      </Typography.Title>
+                    </div>
+                    <Card.Meta
+                      style={{ textAlign: "center", padding: "10px" }}
+                      description={`Voting contract at address: ${
+                        TWdata[item?.index]
+                      }`}
+                    />
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-evenly",
+                        marginTop: "10px",
+                      }}
+                    >
+                      <Switch
+                        size="small"
+                        checkedChildren="KYC"
+                        disabled
+                        defaultChecked
+                      />
+                    </div>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+          </Spin>
+        </Panel>
+      </Collapse>
 
       <Modal
         title={`Voting: ${titles[selectedVoting]}`}
@@ -457,6 +500,24 @@ const TWVotingCards = () => {
           <VotingModeration votingAddress={TWdata?.[selectedVoting]} />
         )}
         {renderModalContent()}
+
+        {endTime < currentTimestamp && voters?.voted && !voters?.claimed && (
+          <div>
+            <Divider />
+            <Alert
+              description={`Please don't forget to claim your ${parseFloat(
+                fromWei(voters?.tokenVoteWeight)
+              ).toFixed(2)} SLK.`}
+              type="info"
+              showIcon
+            />
+            <br></br>
+            <Button key="submit" type="primary" onClick={() => claimTokens?.()}>
+              Claim
+            </Button>
+          </div>
+        )}
+
         <Divider />
         <div
           style={{

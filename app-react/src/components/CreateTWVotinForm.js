@@ -6,10 +6,6 @@ import {
   Form,
   Input,
   Button,
-  Switch,
-  Space,
-  Spin,
-  Alert,
   Select,
   Collapse,
   notification,
@@ -21,7 +17,6 @@ import {
   MinusCircleOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-import useCheckKYC from "../utils/isKYC";
 import useGetIsModerator from "../utils/isModerator";
 import "../App.css";
 import { Address as tokenAddress } from "../contracts/tokenContract";
@@ -33,8 +28,6 @@ const CreateTWVotingForm = () => {
   const [title, setTitle] = useState("");
   const [proposalNames, setProposalNames] = useState([]);
   const [durationMinutes, setDurationMinutes] = useState(60);
-
-  const isUserKYC = useCheckKYC();
   const isModerator = useGetIsModerator();
 
   const transactionIsSuccess = () => {
@@ -104,8 +97,9 @@ const CreateTWVotingForm = () => {
         className="custom-collapse"
         style={{
           marginTop: "20px",
+          marginBottom: "20px",
           backgroundColor: "#fbd9d3",
-          borderColor: "#ffb09c",
+          borderColor: "#fbd9d3",
         }}
         accordion
       >

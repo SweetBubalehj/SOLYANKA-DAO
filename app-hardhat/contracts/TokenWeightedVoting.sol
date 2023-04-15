@@ -150,6 +150,7 @@ contract TokenWeightedVoting is ReentrancyGuard {
         Voter storage _user = addressToVoter[msg.sender];
 
         require(_user.voted, "You are not participated");
+        require(block.timestamp > endTime, "Voting hasn't ended yet");
         require(!_user.claimed, "Already claimed");
 
         uint256 totalTokens = _user.tokenVoteWeight;

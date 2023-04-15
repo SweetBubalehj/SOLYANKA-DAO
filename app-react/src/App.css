@@ -7,11 +7,11 @@
 }
 
 .custom-collapse .ant-collapse-header {
-  border-color:	#ffb09c;
+  border-color: #fbd9d3;
 }
 
 .custom-collapse .ant-collapse-item {
-  border-color:	#ffb09c;
+  border-color: #fbd9d3;
 }
 
 .ant-modal {
@@ -46,7 +46,7 @@
   }
 }
 
-div[disabled]{
+div[disabled] {
   opacity: 30%;
 }
 
