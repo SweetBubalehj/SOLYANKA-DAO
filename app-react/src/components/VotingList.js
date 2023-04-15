@@ -19,6 +19,7 @@ import {
   Progress,
   notification,
   Divider,
+  Spin
 } from "antd";
 import {
   Address as factoryAddress,
@@ -46,6 +47,7 @@ const VotingList = () => {
   const [kycStatuses, setKycStatuses] = useState([]);
   const [privateStatuses, setPrivateStatuses] = useState([]);
   const [gradients, setGradients] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const isUserVerified = useCheckIdentity();
@@ -225,6 +227,7 @@ const VotingList = () => {
         }
         setTitles(newTitles);
         setPrivateStatuses(newPrivateStatuses);
+        setLoading(false);
       };
       fetchTitlesAndPrivateStatuses();
     }
@@ -410,61 +413,65 @@ const VotingList = () => {
         onChange={(e) => setSearchQuery(e.target.value)}
         allowClear
       />
-      <Row gutter={[16, 16]} style={{ marginTop: "40px" }}>
-        {filteredList.map((item, index) => (
-          <Col xs={24} sm={12} md={8} lg={8} xl={8} key={item.index}>
-            <Card hoverable>
-              <div
-                style={{
-                  width: "100%",
-                  height: "200px",
-                  borderRadius: "10px",
-                  background: gradients[index],
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexDirection: "column",
-                  cursor: "pointer",
-                }}
-                onClick={() => showModal(item.index)}
-              >
-                <Typography.Title level={4} style={{ color: "white" }}>
-                  {item.title}
-                </Typography.Title>
-              </div>
-              <Card.Meta
-                style={{ textAlign: "center", padding: "10px" }}
-                description={`Voting contract at address: ${data[item.index]}`}
-              />
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-evenly",
-                  marginTop: "10px",
-                }}
-              >
-                {kycStatuses[item.index] && (
-                  <Switch
-                    size="small"
-                    checkedChildren="KYC"
-                    disabled
-                    defaultChecked
-                  />
-                )}
-                {privateStatuses[item.index] && (
-                  <Switch
-                    size="small"
-                    checkedChildren="PRIVATE"
-                    disabled
-                    defaultChecked
-                  />
-                )}
-              </div>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+      <Spin spinning={loading}>
+        <Row gutter={[16, 16]} style={{ marginTop: "40px" }}>
+          {filteredList.map((item, index) => (
+            <Col xs={24} sm={12} md={8} lg={8} xl={8} key={item.index}>
+              <Card hoverable>
+                <div
+                  style={{
+                    width: "100%",
+                    height: "200px",
+                    borderRadius: "10px",
+                    background: gradients[index],
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexDirection: "column",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => showModal(item.index)}
+                >
+                  <Typography.Title level={4} style={{ color: "white" }}>
+                    {item.title}
+                  </Typography.Title>
+                </div>
+                <Card.Meta
+                  style={{ textAlign: "center", padding: "10px" }}
+                  description={`Voting contract at address: ${
+                    data[item.index]
+                  }`}
+                />
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-evenly",
+                    marginTop: "10px",
+                  }}
+                >
+                  {kycStatuses[item.index] && (
+                    <Switch
+                      size="small"
+                      checkedChildren="KYC"
+                      disabled
+                      defaultChecked
+                    />
+                  )}
+                  {privateStatuses[item.index] && (
+                    <Switch
+                      size="small"
+                      checkedChildren="PRIVATE"
+                      disabled
+                      defaultChecked
+                    />
+                  )}
+                </div>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      </Spin>
 
       <Modal
         title={`Voting: ${titles[selectedVoting]}`}
