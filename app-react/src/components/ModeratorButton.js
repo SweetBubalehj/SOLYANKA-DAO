@@ -8,7 +8,16 @@ import {
 import { Address, ABI } from "../contracts/sbtContract";
 import useGetIsModerator from "../utils/isModerator";
 import useGetIsAdmin from "../utils/isAdmin";
-import { Card, Typography, Modal, Form, Input, Button, Checkbox } from "antd";
+import {
+  Card,
+  Typography,
+  Modal,
+  Form,
+  Input,
+  Button,
+  Checkbox,
+  notification,
+} from "antd";
 
 const { Title, Text } = Typography;
 
@@ -29,10 +38,36 @@ const ModeratorButtons = () => {
 
   const {
     data: contractInfo,
-    isLoading,
-    isSuccess,
+    isLoading: TurnKYCLoading,
+    isSuccess: TurnKYCSuccess,
     write,
   } = useContractWrite(config);
+
+  const transactionIsSuccess = () => {
+    notification.success({
+      message: "Transaction successful",
+      placement: "bottomRight",
+    });
+  };
+
+  const transactionIsLoading = () => {
+    notification.warning({
+      message: "Check your wallet",
+      placement: "bottomRight",
+    });
+  };
+
+  useEffect(() => {
+    if (TurnKYCLoading) {
+      transactionIsLoading();
+    }
+  }, [TurnKYCLoading]);
+
+  useEffect(() => {
+    if (TurnKYCSuccess) {
+      transactionIsSuccess();
+    }
+  }, [TurnKYCSuccess]);
 
   //Modal part
   const showModal = () => {

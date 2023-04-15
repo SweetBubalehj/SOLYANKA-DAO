@@ -8,7 +8,15 @@ import {
 import { Address, ABI } from "../contracts/sbtContract";
 import useGetIsModerator from "../utils/isModerator";
 import useGetIsAdmin from "../utils/isAdmin";
-import { Card, Typography, Modal, Form, Input, Button } from "antd";
+import {
+  Card,
+  Typography,
+  Modal,
+  Form,
+  Input,
+  Button,
+  notification,
+} from "antd";
 
 const { Title, Text } = Typography;
 
@@ -27,8 +35,12 @@ const AdminModeratorButtons = () => {
     args: [addr],
   });
 
-  const { data: addModeratorData, write: addModerator } =
-    useContractWrite(addModeratorConfig);
+  const {
+    data: addModeratorData,
+    isLoading: AddModeratorLoading,
+    isSuccess: AddModeratorSuccess,
+    write: addModerator,
+  } = useContractWrite(addModeratorConfig);
 
   const { config: removeModeratorConfig } = usePrepareContractWrite({
     address: Address,
@@ -37,8 +49,50 @@ const AdminModeratorButtons = () => {
     args: [addr],
   });
 
-  const { data: removeModeratorData, write: removeModerator } =
-    useContractWrite(removeModeratorConfig);
+  const {
+    data: removeModeratorData,
+    isLoading: RemoveModeratorLoading,
+    isSuccess: RemoveModeratorSuccess,
+    write: removeModerator,
+  } = useContractWrite(removeModeratorConfig);
+
+  const transactionIsSuccess = () => {
+    notification.success({
+      message: "Transaction successful",
+      placement: "bottomRight",
+    });
+  };
+
+  const transactionIsLoading = () => {
+    notification.warning({
+      message: "Check your wallet",
+      placement: "bottomRight",
+    });
+  };
+
+  useEffect(() => {
+    if (AddModeratorLoading) {
+      transactionIsLoading();
+    }
+  }, [AddModeratorLoading]);
+
+  useEffect(() => {
+    if (AddModeratorSuccess) {
+      transactionIsSuccess();
+    }
+  }, [AddModeratorSuccess]);
+
+  useEffect(() => {
+    if (RemoveModeratorLoading) {
+      transactionIsLoading();
+    }
+  }, [RemoveModeratorLoading]);
+
+  useEffect(() => {
+    if (RemoveModeratorSuccess) {
+      transactionIsSuccess();
+    }
+  }, [RemoveModeratorSuccess]);
 
   //Modal part
   const showModal = () => {

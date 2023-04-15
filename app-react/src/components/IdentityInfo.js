@@ -16,7 +16,10 @@ import {
   Space,
   Spin,
   Alert,
+  notification,
+  Avatar,
 } from "antd";
+import { UserOutlined } from "@ant-design/icons";
 import useCheckIdentity from "../utils/isIdentified";
 
 const { Title, Text } = Typography;
@@ -38,7 +41,12 @@ const IdentityInfo = () => {
     args: [newUserName, newEmail, newAge],
   });
 
-  const { data, isLoading, isSuccess, write } = useContractWrite(config);
+  const {
+    data,
+    isLoading: UpdateSoulLoading,
+    isSuccess: UpdateSoulSuccess,
+    write,
+  } = useContractWrite(config);
 
   const { data: identifyInfo } = useContractRead({
     address: Address,
@@ -46,6 +54,32 @@ const IdentityInfo = () => {
     functionName: "getSoul",
     args: [address],
   });
+
+  const transactionIsSuccess = () => {
+    notification.success({
+      message: "Transaction successful",
+      placement: "bottomRight",
+    });
+  };
+
+  const transactionIsLoading = () => {
+    notification.warning({
+      message: "Check your wallet",
+      placement: "bottomRight",
+    });
+  };
+
+  useEffect(() => {
+    if (UpdateSoulLoading) {
+      transactionIsLoading();
+    }
+  }, [UpdateSoulLoading]);
+
+  useEffect(() => {
+    if (UpdateSoulSuccess) {
+      transactionIsSuccess();
+    }
+  }, [UpdateSoulSuccess]);
 
   const [userName, setUserName] = useState(null);
   const [userEmail, setUserEmail] = useState(null);
@@ -130,22 +164,33 @@ const IdentityInfo = () => {
     <Card title="Your profile">
       {address && (
         <>
-          <Title level={2}>Welcome, {userName}!</Title>
-          <Text>Email: {userEmail}</Text>
-          <br />
-          <Text>Age: {userAge.toString()}</Text>
-          <br />
-          {hasKYC ? (
-            <Text>You have completed KYC.</Text>
-          ) : (
-            <Text>You haven't completed KYC.</Text>
-          )}
-          {hasRights && <Text>You have moderator rights.</Text>}
-          <br />
+          <div
+            style={{ display: "flex", alignItems: "center", marginBottom: 24 }}
+          >
+            <Avatar
+              size={64}
+              style={{ marginRight: 24 }}
+              icon={<UserOutlined />}
+            />
+            <div>
+              <Title level={2}>Welcome, {userName}!</Title>
+              <Text>Email: {userEmail}</Text>
+              <br />
+              <Text>Age: {userAge.toString()}</Text>
+            </div>
+          </div>
+          <div style={{ marginBottom: 24 }}>
+            {hasKYC ? (
+              <Text>You have completed KYC.</Text>
+            ) : (
+              <Text>You haven't completed KYC.</Text>
+            )}
+            <div>{hasRights && <Text>You have moderator rights.</Text>}</div>
+          </div>
         </>
       )}
-      {address && !isLoading && (
-        <Button type="primary" onClick={showModal}>
+      {address && !UpdateSoulLoading && (
+        <Button type="primary" onClick={showModal} style={{ marginBottom: 24 }}>
           Edit profile
         </Button>
       )}
@@ -153,9 +198,8 @@ const IdentityInfo = () => {
         title="Edit profile"
         open={isModalOpen}
         onOk={handleOk}
-        onShow={showModal}
-        //okButtonProps={{ disabled: !(userName && userEmail && userAge) }} <= бывает пустой стринг
         onCancel={handleCancel}
+        okButtonProps={{ disabled: !(newUserName && newEmail && newAge) }}
       >
         <Form>
           <Form.Item label="Username">
