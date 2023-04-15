@@ -25,7 +25,11 @@ import {
   Address as factoryAddress,
   ABI as factoryABI,
 } from "../contracts/factoryContract";
-import { ABI as votingABI } from "../contracts/votingContract";
+import {
+  Address as tokenAddress,
+  ABI as tokenABI,
+} from "../contracts/tokenContract";
+import { ABI as TWvotingABI } from "../contracts/tokenWeightedContract";
 import { ethers } from "ethers";
 import useCheckIdentity from "../utils/isIdentified";
 import { ClockCircleOutlined } from "@ant-design/icons";
@@ -36,14 +40,22 @@ import getRandomGradient from "../utils/getRandomGradient";
 
 const { Text, Title } = Typography;
 
+const toWei = (value) => ethers.utils.parseEther(value.toString());
+
+const fromWei = (value) =>
+  ethers.utils.formatEther(
+    typeof value === "string" ? value : value.toString()
+  );
+
 const TWVotingCards = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentTimestamp, setCurrentTimestamp] = useState(null);
   const [selectedProposal, setSelectedProposal] = useState(null);
   const [selectedVoting, setSelectedVoting] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
   const [gradients, setGradients] = useState([]);
   const [voteWeight, setVoteWeight] = useState(1);
+  const [titles, setTitles] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const isUserVerified = useCheckIdentity();
@@ -70,50 +82,62 @@ const TWVotingCards = () => {
     setCurrentTimestamp(block.timestamp);
   };
 
-  const { data } = useContractRead({
+  const { data: TWdata } = useContractRead({
     address: factoryAddress,
     abi: factoryABI,
     functionName: "getDeployedTokenWeightedVotings",
   });
 
   const { data: voters } = useContractRead({
-    address: data?.[selectedVoting],
-    abi: votingABI,
+    address: TWdata?.[selectedVoting],
+    abi: TWvotingABI,
     functionName: "addressToVoter",
     args: [userAddress],
   });
 
   const { data: winnerName } = useContractRead({
-    address: data?.[selectedVoting],
-    abi: votingABI,
+    address: TWdata?.[selectedVoting],
+    abi: TWvotingABI,
     functionName: "getWinnerName",
   });
 
   const { data: endTime } = useContractRead({
-    address: data?.[selectedVoting],
-    abi: votingABI,
+    address: TWdata?.[selectedVoting],
+    abi: TWvotingABI,
     functionName: "endTime",
   });
 
   const { data: proposalNames } = useContractRead({
-    address: data?.[selectedVoting],
-    abi: votingABI,
+    address: TWdata?.[selectedVoting],
+    abi: TWvotingABI,
     functionName: "getProposalsNames",
   });
 
   const { data: proposalVotes } = useContractRead({
-    address: data?.[selectedVoting],
-    abi: votingABI,
+    address: TWdata?.[selectedVoting],
+    abi: TWvotingABI,
     functionName: "getProposalsVotes",
   });
 
   const { config: voteConfig } = usePrepareContractWrite({
-    address: data?.[selectedVoting],
-    abi: votingABI,
+    address: TWdata?.[selectedVoting],
+    abi: TWvotingABI,
     functionName: "vote",
-    args: [voteWeight, selectedProposal],
+    args: [1, selectedProposal],
   });
   const { isLoading, isSuccess, write: vote } = useContractWrite(voteConfig);
+
+  const { config: approveConfig } = usePrepareContractWrite({
+    address: tokenAddress,
+    abi: tokenABI,
+    functionName: "approve",
+    args: [TWdata?.[selectedVoting], toWei(voteWeight)],
+  });
+  const {
+    isLoading: approveLoading,
+    isSuccess: approveSuccess,
+    write: approve,
+  } = useContractWrite(approveConfig);
 
   const formatDuration = (seconds) => {
     if (seconds < 60) {
@@ -141,7 +165,19 @@ const TWVotingCards = () => {
     return formattedDuration;
   };
 
-  console.log(data[0]);
+  const filteredList = useMemo(() => {
+    if (!searchQuery) return titles.map((title, index) => ({ index, title }));
+
+    return titles
+      .map((title, index) => ({ index, title }))
+      .filter(
+        (item) =>
+          item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          TWdata[item.index].toLowerCase().includes(searchQuery.toLowerCase())
+      );
+  }, [searchQuery, titles, TWdata]);
+
+  console.log(TWdata[0]);
 
   const showModal = (index) => {
     setSelectedProposal(null);
@@ -156,9 +192,9 @@ const TWVotingCards = () => {
   };
 
   useEffect(() => {
-    const newGradients = data.map(() => getRandomGradient());
+    const newGradients = filteredList.map(() => getRandomGradient());
     setGradients(newGradients);
-  }, [data]);
+  }, [filteredList]);
 
   useEffect(() => {
     if (isLoading) {
@@ -171,6 +207,21 @@ const TWVotingCards = () => {
       transactionIsSuccess();
     }
   }, [isSuccess]);
+
+  useEffect(() => {
+    if (TWdata) {
+      const fetchTitles = async () => {
+        const newTitles = [];
+        for (const address of TWdata) {
+          const contract = new ethers.Contract(address, TWvotingABI, provider);
+          const title = await contract.title();
+          newTitles.push(title);
+        }
+        setTitles(newTitles);
+      };
+      fetchTitles();
+    }
+  }, [TWdata]);
 
   function TimeRemaining() {
     return (
@@ -223,7 +274,7 @@ const TWVotingCards = () => {
       );
     }
 
-    if (data?.[selectedVoting] && voters?.voted) {
+    if (TWdata?.[selectedVoting] && voters?.voted) {
       return (
         <>
           <TimeRemaining />
@@ -275,6 +326,15 @@ const TWVotingCards = () => {
         <Button
           key="submit"
           type="primary"
+          onClick={() => approve?.()}
+          style={{ marginTop: "16px" }}
+        >
+          Approve
+        </Button>
+        
+        <Button
+          key="submit"
+          type="primary"
           onClick={() => vote?.()}
           style={{ marginTop: "16px" }}
         >
@@ -289,9 +349,14 @@ const TWVotingCards = () => {
       <Title level={3} style={{ margin: "10px auto", textAlign: "center" }}>
         Token Weighted Votings
       </Title>
-      <Divider />
+      <Input
+        placeholder="Search by title or address"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        allowClear
+      />
       <Row gutter={[16, 16]} style={{ marginTop: "40px" }}>
-        {data.map((item, index) => (
+        {filteredList.map((item, index) => (
           <Col xs={24} sm={24} md={12} lg={12} xl={8} key={item.index}>
             <Card hoverable>
               <div
@@ -314,7 +379,9 @@ const TWVotingCards = () => {
               </div>
               <Card.Meta
                 style={{ textAlign: "center", padding: "10px" }}
-                description={`Voting contract at address: ${data[item.index]}`}
+                description={`Voting contract at address: ${
+                  TWdata[item.index]
+                }`}
               />
               <div
                 style={{
@@ -337,13 +404,13 @@ const TWVotingCards = () => {
       </Row>
 
       <Modal
-        title={`Voting: ${data[selectedVoting]?.title}`}
+        title={`Voting: ${TWdata[selectedVoting]?.title}`}
         open={isModalVisible}
         onCancel={handleCancel}
         footer={null}
       >
         {isUserModerator && (
-          <VotingModeration votingAddress={data?.[selectedVoting]} />
+          <VotingModeration votingAddress={TWdata?.[selectedVoting]} />
         )}
         {renderModalContent()}
         <Divider />
