@@ -6,11 +6,12 @@ import {
   Alert,
   Space,
   Spin,
-  Col as Col,
+  Col,
   Row,
   Typography,
+  notification
 } from "antd";
-import { useContractWrite, usePrepareContractWrite } from "wagmi";
+import { useContractWrite, usePrepareContractWrite,useContractRead, useAccount } from "wagmi";
 import {
   Address as stakingAddress,
   ABI as stakingABI,
@@ -26,50 +27,12 @@ import useCheckIdentity from "../utils/isIdentified";
 
 const { Text } = Typography;
 
-let signer;
-let contract;
-let token;
-
-if (typeof window !== "undefined") {
-  const provider = new ethers.providers.Web3Provider(window.ethereum);
-  provider.send("eth_requestAccounts", []).then(() => {
-    provider.listAccounts().then((accounts) => {
-      signer = provider.getSigner(accounts[0]);
-      console.log(signer);
-      contract = new ethers.Contract(stakingAddress, stakingABI, signer);
-      token = new ethers.Contract(tokenAddress, tokenABI, signer);
-      console.log(contract);
-    });
-  });
-}
-
-const toWei = (value) => ethers.utils.parseEther(value.toString());
+const toWei = (value) => ethers.utils.parseEther((value).toString());
 
 const fromWei = (value) =>
   ethers.utils.formatEther(
-    typeof value === "string" ? value : value.toString()
+    typeof value === "string" ? value : (value).toString()
   );
-
-async function myBalance() {
-  console.log(token);
-  let balance;
-  if (typeof token != "undefined") {
-    const adr = signer._address;
-    balance = await token.balanceOf(adr);
-    balance = fromWei(balance);
-    console.log(balance);
-  }
-  console.log(balance);
-  return balance;
-}
-
-async function approveTokenIn(value) {
-  try {
-    await token.approve(contract.address, toWei(value));
-  } catch (e) {
-    console.log(e.message);
-  }
-}
 
 const StakingCards = () => {
   const [isModalStakingOpen, setIsModalStakingOpen] = useState(false);
@@ -79,39 +42,142 @@ const StakingCards = () => {
   const [stakeAmount, setStakeAmount] = useState(1);
   const [isApproved, setIsApproved] = useState(false);
   const isUserKYC = useCheckKYC();
+  const { address: userAddress } = useAccount();
 
   const isVerified = useCheckIdentity();
 
-  const stakeToken = useContractWrite({
-    mode: "recklesslyUnprepared",
+  const transactionIsSuccess = () => {
+    notification.success({
+      message: "Transaction successful",
+      placement: "bottomRight",
+    });
+  };
+
+  const transactionIsLoading = () => {
+    notification.warning({
+      message: "Check your wallet",
+      placement: "bottomRight",
+    });
+  };
+
+  const {data: _balance} = useContractRead({
+    address: tokenAddress,
+    abi: tokenABI,
+    functionName: "balanceOf",
+    args: [userAddress],
+  });
+  
+  function myBalance() {
+    let balance;
+    balance = _balance;
+    balance = fromWei(balance);
+    console.log(balance);
+    return balance;
+  }
+
+  const {config: approveConfig } = usePrepareContractWrite({
+    address: tokenAddress,
+    abi: tokenABI,
+    functionName: "approve",
+    args: [stakingAddress, toWei(stakeAmount)],
+  });
+  const {
+    isLoading: approveLoading,
+    isSuccess: approveSuccess,
+    write: approve,
+  } = useContractWrite(approveConfig);
+
+  function approveTokenIn() {
+    try {
+      approve?.();
+    } catch (e) {
+      console.log(e.message);
+    }
+  }
+
+  const {config: stakeConfig} = usePrepareContractWrite({
     address: stakingAddress,
     abi: stakingABI,
     functionName: "stakeToken",
     args: [toWei(stakeAmount)],
   });
+  const {
+    isLoading: stakeLoading,
+    isSuccess: stakeSuccess,
+    write: stakeToken,
+  } = useContractWrite(stakeConfig);
 
-  const claimReward = useContractWrite({
-    mode: "recklesslyUnprepared",
+  const {rewardConfig }= usePrepareContractWrite({
     address: stakingAddress,
     abi: stakingABI,
     functionName: "claimReward",
   });
+  const {
+    isLoading: rewardLoading,
+    isSuccess: rewardSuccess,
+    write: claimReward,
+  } = useContractWrite(rewardConfig);
+
 
   function handleStakeAmountChange(newStakeAmount) {
     setStakeAmount(newStakeAmount);
   }
 
   useEffect(() => {
-    async function updateBalance() {
-      const newBalance = await myBalance();
+    function updateBalance() {
+      const newBalance = myBalance();
       setBalance(newBalance);
     }
     updateBalance();
   });
 
   useEffect(() => {
-    console.log(isUserKYC);
-  });
+    if (approveLoading) {
+      transactionIsLoading();
+    }
+  }, [
+    approveLoading
+  ]);
+
+  useEffect(() => {
+    if (approveSuccess) {
+      transactionIsSuccess();
+    }
+  }, [
+    approveSuccess
+  ]);
+  
+  useEffect(() => {
+    if (stakeLoading) {
+      transactionIsLoading();
+    }
+  }, [
+    stakeLoading
+  ]);
+
+  useEffect(() => {
+    if (stakeSuccess) {
+      transactionIsSuccess();
+    }
+  }, [
+    stakeSuccess
+  ]);
+
+  useEffect(() => {
+    if (rewardLoading) {
+      transactionIsLoading();
+    }
+  }, [
+    rewardLoading
+  ]);
+
+  useEffect(() => {
+    if (rewardSuccess) {
+      transactionIsSuccess();
+    }
+  }, [
+    rewardSuccess
+  ]);
 
   const showModalStaking = () => {
     if (isUserKYC) {
@@ -126,7 +192,7 @@ const StakingCards = () => {
 
   const handleReward = () => {
     try {
-      claimReward.write();
+      claimReward?.();
       console.log("some");
     } catch (e) {
       console.log(e.message);
@@ -135,7 +201,7 @@ const StakingCards = () => {
 
   const handleStake = () => {
     if (isApproved) {
-      stakeToken.write();
+      stakeToken?.();
     } else {
       console.log("you should approve it first");
     }
@@ -157,9 +223,7 @@ const StakingCards = () => {
     setIsModalStakingOpen(false);
   };
 
-  const handleOkReward = () => {
-    setisModalRewardOpen(false);
-  };
+
   const handleOkBalance = () => {
     setIsModalBalanceOpen(false);
   };

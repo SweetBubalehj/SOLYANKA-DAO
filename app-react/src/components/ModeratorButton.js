@@ -24,7 +24,7 @@ const ModeratorButtons = () => {
     address: Address,
     abi: ABI,
     functionName: "turnKYC",
-    args: [addrSoul, componentDisabled],
+    args: [addrSoul, !componentDisabled],
   });
 
   const {
