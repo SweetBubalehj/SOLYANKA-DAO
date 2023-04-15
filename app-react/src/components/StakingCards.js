@@ -272,8 +272,16 @@ const StakingCards = () => {
             showIcon
           />
         </div>
-        <Row gutter={[16, 16]} justify="center">
-          <Col xs={24} sm={12} md={12} lg={8} xl={8} className="check" onClick={showModalStaking}>
+        <Row gutter={[16, 16]} justify="center" disabled>
+          <Col
+            xs={24}
+            sm={12}
+            md={12}
+            lg={8}
+            xl={8}
+            className="check"
+            onClick={showModalStaking}
+          >
             <svg
               style={{
                 backgroundColor: "lightblue",
@@ -291,7 +299,15 @@ const StakingCards = () => {
               Staking
             </h2>
           </Col>
-          <Col xs={24} sm={12} md={12} lg={8} xl={8} className="check" onClick={showModalReward}>
+          <Col
+            xs={24}
+            sm={12}
+            md={12}
+            lg={8}
+            xl={8}
+            className="check"
+            onClick={showModalReward}
+          >
             <svg
               style={{
                 backgroundColor: "lightgreen",
@@ -309,7 +325,15 @@ const StakingCards = () => {
               Get Reward
             </h2>
           </Col>
-          <Col xs={24} sm={12} md={12} lg={8} xl={8} className="check" onClick={showModalBalance}>
+          <Col
+            xs={24}
+            sm={12}
+            md={12}
+            lg={8}
+            xl={8}
+            className="check"
+            onClick={showModalBalance}
+          >
             <svg
               style={{
                 backgroundColor: "pink",
@@ -335,7 +359,15 @@ const StakingCards = () => {
   if (isUserKYC && isVerified) {
     return (
       <Row gutter={[16, 16]} justify="center">
-        <Col xs={24} sm={12} md={12} lg={8} xl={8} className="check" onClick={showModalStaking}>
+        <Col
+          xs={24}
+          sm={12}
+          md={12}
+          lg={8}
+          xl={8}
+          className="check"
+          onClick={showModalStaking}
+        >
           <svg
             style={{
               backgroundColor: "lightblue",
@@ -353,7 +385,15 @@ const StakingCards = () => {
             Staking
           </h2>
         </Col>
-        <Col xs={24} sm={12} md={12} lg={8} xl={8} className="check" onClick={showModalReward}>
+        <Col
+          xs={24}
+          sm={12}
+          md={12}
+          lg={8}
+          xl={8}
+          className="check"
+          onClick={showModalReward}
+        >
           <svg
             style={{
               backgroundColor: "lightgreen",
@@ -371,7 +411,15 @@ const StakingCards = () => {
             Get Reward
           </h2>
         </Col>
-        <Col  xs={24} sm={12} md={12} lg={8} xl={8} className="check" onClick={showModalBalance}>
+        <Col
+          xs={24}
+          sm={12}
+          md={12}
+          lg={8}
+          xl={8}
+          className="check"
+          onClick={showModalBalance}
+        >
           <svg
             style={{
               backgroundColor: "pink",
