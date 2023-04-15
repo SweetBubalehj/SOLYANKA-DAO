@@ -448,7 +448,7 @@ const TWVotingCards = () => {
       </Row>
 
       <Modal
-        title={`Voting: ${TWdata[selectedVoting]?.title}`}
+        title={`Voting: ${titles[selectedVoting]}`}
         open={isModalVisible}
         onCancel={handleCancel}
         footer={null}
