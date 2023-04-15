@@ -187,8 +187,6 @@ const TWVotingCards = () => {
       );
   }, [searchQuery, titles, TWdata]);
 
-  console.log(TWdata[0]);
-
   const showModal = (index) => {
     setSelectedProposal(null);
     setSelectedVoting(index);
@@ -362,22 +360,29 @@ const TWVotingCards = () => {
             <Button
               key="submit"
               type="primary"
-              disabled={voteWeight && allowanceInfo && voteWeight > fromWei(allowanceInfo)}
+              disabled={
+                voteWeight &&
+                allowanceInfo &&
+                voteWeight > fromWei(allowanceInfo)
+              }
               onClick={() => vote?.()}
               style={{ width: "100%" }}
             >
               Vote
             </Button>
           </Col>
-          {voteWeight && allowanceInfo && voteWeight > fromWei(allowanceInfo) && (
-            <Col xs={24} style={{ marginTop: "16px" }}>
-              <Alert
-                description="Vote weight is greater than your allowance. Please approve tokens."
-                type="error"
-                showIcon
-              />
-            </Col>
-          )}
+          {voteWeight &&
+            allowanceInfo &&
+            voteWeight > fromWei(allowanceInfo) && (
+              <Col xs={24} style={{ marginTop: "16px" }}>
+                <Alert
+                  message="Please approve tokens"
+                  description="Token weight amount is greater than your allowance."
+                  type="error"
+                  showIcon
+                />
+              </Col>
+            )}
         </Row>
       </>
     );
