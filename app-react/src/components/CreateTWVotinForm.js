@@ -15,7 +15,6 @@ import {
   notification,
 } from "antd";
 import { Address, ABI } from "../contracts/factoryContract";
-import useCheckIdentity from "../utils/isIdentified";
 import {
   FormOutlined,
   UserOutlined,
@@ -23,19 +22,20 @@ import {
   PlusOutlined,
 } from "@ant-design/icons";
 import useCheckKYC from "../utils/isKYC";
+import useGetIsModerator from "../utils/isModerator";
+import "../App.css";
+import { Address as tokenAddress } from "../contracts/tokenContract";
 
 const { Option } = Select;
 const { Panel } = Collapse;
 
-const CreateVotingForm = () => {
+const CreateTWVotingForm = () => {
   const [title, setTitle] = useState("");
   const [proposalNames, setProposalNames] = useState([]);
   const [durationMinutes, setDurationMinutes] = useState(60);
-  const [isKYC, setIsKYC] = useState(false);
-  const [isPrivate, setIsPrivate] = useState(false);
 
   const isUserKYC = useCheckKYC();
-  const isVerified = useCheckIdentity();
+  const isModerator = useGetIsModerator();
 
   const transactionIsSuccess = () => {
     notification.success({
@@ -54,9 +54,11 @@ const CreateVotingForm = () => {
   const { config } = usePrepareContractWrite({
     address: Address,
     abi: ABI,
-    functionName: "createVoting",
-    args: [title, proposalNames, durationMinutes, isKYC, isPrivate],
+    functionName: "createTokenWeightedVoting",
+    args: [title, proposalNames, durationMinutes, tokenAddress],
   });
+
+  console.log(tokenAddress);
 
   const { isLoading, isSuccess, write } = useContractWrite(config);
 
@@ -88,35 +90,26 @@ const CreateVotingForm = () => {
     }
   }, [isSuccess]);
 
-  if (isVerified === undefined) {
-    return (
-      <Space
-        direction="vertical"
-        style={{ width: "100%", marginBottom: "50px" }}
-      >
-        <Spin tip="Awaiting Wallet" size="large">
-          <div />
-        </Spin>
-      </Space>
-    );
+  if (isModerator === undefined) {
+    return;
   }
 
-  if (!isVerified) {
-    return (
-      <Alert
-        style={{ width: "100%", marginBottom: "50px" }}
-        message="You are not registered"
-        description="Please identify yourself to use application."
-        type="warning"
-        showIcon
-      />
-    );
+  if (!isModerator) {
+    return;
   }
 
   return (
     <>
-      <Collapse accordion style={{marginTop: "20px"}}>
-        <Panel header="Create Classic Voting" key="1">
+      <Collapse
+        className="custom-collapse"
+        style={{
+          marginTop: "20px",
+          backgroundColor: "#fbd9d3",
+          borderColor: "#ffb09c",
+        }}
+        accordion
+      >
+        <Panel header="Create Token Weighted Voting" key="1">
           <Form layout="vertical">
             <Form.Item
               required={false}
@@ -240,24 +233,6 @@ const CreateVotingForm = () => {
                     ))}
                   </Select>
                 </Col>
-                <Col xs={24} sm={8} md={6} style={{ textAlign: "center" }}>
-                  <Switch
-                    style={{ width: "80px", marginRight: "5px" }}
-                    checkedChildren="PRIVATE"
-                    unCheckedChildren="PUBLIC"
-                    onChange={setIsPrivate}
-                  />
-                </Col>
-                {isUserKYC && (
-                  <Col xs={24} sm={8} md={6} style={{ textAlign: "center" }}>
-                    <Switch
-                      style={{ width: "80px", marginRight: "5px" }}
-                      checkedChildren="KYC ON"
-                      unCheckedChildren="KYC OFF"
-                      onChange={setIsKYC}
-                    />
-                  </Col>
-                )}
               </Row>
             </Form.Item>
 
@@ -267,7 +242,7 @@ const CreateVotingForm = () => {
                 htmlType="submit"
                 onClick={() => write?.()}
               >
-                Deploy Voting
+                Deploy TW Voting
               </Button>
             </Form.Item>
           </Form>
@@ -277,4 +252,4 @@ const CreateVotingForm = () => {
   );
 };
 
-export default CreateVotingForm;
+export default CreateTWVotingForm;

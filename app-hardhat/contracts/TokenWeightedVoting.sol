@@ -78,6 +78,8 @@ contract TokenWeightedVoting is ReentrancyGuard {
             "Duration from 1 hour to 1 month"
         );
 
+        title = _title; // <= bug was here
+
         solyankaToken = IToken(_tokenAddress);
 
         endTime = block.timestamp + _durationMinutes * 1 minutes;

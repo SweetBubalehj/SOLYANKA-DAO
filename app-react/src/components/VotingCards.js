@@ -19,7 +19,7 @@ import {
   Progress,
   notification,
   Divider,
-  Spin
+  Spin,
 } from "antd";
 import {
   Address as factoryAddress,
@@ -37,7 +37,7 @@ import getRandomGradient from "../utils/getRandomGradient";
 
 const { Text, Title } = Typography;
 
-const VotingList = () => {
+const VotingCards = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentTimestamp, setCurrentTimestamp] = useState(null);
   const [selectedProposal, setSelectedProposal] = useState(null);
@@ -212,7 +212,8 @@ const VotingList = () => {
       fetchTitlesAndKycStatuses();
     }
   }, [data]);
-
+ 
+  //here here here
   useEffect(() => {
     if (data) {
       const fetchTitlesAndPrivateStatuses = async () => {
@@ -405,7 +406,7 @@ const VotingList = () => {
   return (
     <>
       <Title level={3} style={{ margin: "10px auto", textAlign: "center" }}>
-        Votings
+        Classic Votings
       </Title>
       <Input
         placeholder="Search by title or address"
@@ -515,4 +516,4 @@ const VotingList = () => {
   );
 };
 
-export default VotingList;
+export default VotingCards;
