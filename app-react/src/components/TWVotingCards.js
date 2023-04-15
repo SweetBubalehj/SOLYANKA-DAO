@@ -19,7 +19,7 @@ import {
   Progress,
   notification,
   Divider,
-  Spin
+  Spin,
 } from "antd";
 import {
   Address as factoryAddress,
@@ -29,7 +29,6 @@ import { ABI as votingABI } from "../contracts/votingContract";
 import { ethers } from "ethers";
 import useCheckIdentity from "../utils/isIdentified";
 import { ClockCircleOutlined } from "@ant-design/icons";
-import VotingSettings from "./VotingSettings";
 import useCheckKYC from "../utils/isKYC";
 import useGetIsModerator from "../utils/isModerator";
 import VotingModeration from "./VotingModeration";
@@ -37,17 +36,14 @@ import getRandomGradient from "../utils/getRandomGradient";
 
 const { Text, Title } = Typography;
 
-const VotingList = () => {
+const TWVotingCards = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentTimestamp, setCurrentTimestamp] = useState(null);
   const [selectedProposal, setSelectedProposal] = useState(null);
   const [selectedVoting, setSelectedVoting] = useState(null);
-  const [titles, setTitles] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [kycStatuses, setKycStatuses] = useState([]);
-  const [privateStatuses, setPrivateStatuses] = useState([]);
   const [gradients, setGradients] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [voteWeight, setVoteWeight] = useState(1);
 
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const isUserVerified = useCheckIdentity();
@@ -77,13 +73,7 @@ const VotingList = () => {
   const { data } = useContractRead({
     address: factoryAddress,
     abi: factoryABI,
-    functionName: "getDeployedVotings",
-  });
-
-  const { data: chairPerson } = useContractRead({
-    address: data?.[selectedVoting],
-    abi: votingABI,
-    functionName: "chairPerson",
+    functionName: "getDeployedTokenWeightedVotings",
   });
 
   const { data: voters } = useContractRead({
@@ -117,30 +107,11 @@ const VotingList = () => {
     functionName: "getProposalsVotes",
   });
 
-  const { data: isContractKYC } = useContractRead({
-    address: data?.[selectedVoting],
-    abi: votingABI,
-    functionName: "isKYC",
-  });
-
-  const { data: isWhitelisted } = useContractRead({
-    address: data?.[selectedVoting],
-    abi: votingABI,
-    functionName: "addressToWhitelist",
-    args: [userAddress],
-  });
-
-  const { data: isPrivate } = useContractRead({
-    address: data?.[selectedVoting],
-    abi: votingABI,
-    functionName: "isPrivate",
-  });
-
   const { config: voteConfig } = usePrepareContractWrite({
     address: data?.[selectedVoting],
     abi: votingABI,
     functionName: "vote",
-    args: [selectedProposal],
+    args: [voteWeight, selectedProposal],
   });
   const { isLoading, isSuccess, write: vote } = useContractWrite(voteConfig);
 
@@ -170,6 +141,8 @@ const VotingList = () => {
     return formattedDuration;
   };
 
+  console.log(data[0]);
+
   const showModal = (index) => {
     setSelectedProposal(null);
     setSelectedVoting(index);
@@ -182,61 +155,10 @@ const VotingList = () => {
     setIsModalVisible(false);
   };
 
-  const filteredList = useMemo(() => {
-    if (!searchQuery) return titles.map((title, index) => ({ index, title }));
-
-    return titles
-      .map((title, index) => ({ index, title }))
-      .filter(
-        (item) =>
-          item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          data[item.index].toLowerCase().includes(searchQuery.toLowerCase())
-      );
-  }, [searchQuery, titles, data]);
-
   useEffect(() => {
-    if (data) {
-      const fetchTitlesAndKycStatuses = async () => {
-        const newTitles = [];
-        const newKycStatuses = [];
-        for (const address of data) {
-          const contract = new ethers.Contract(address, votingABI, provider);
-          const title = await contract.title();
-          const kycStatus = await contract.isKYC();
-          newTitles.push(title);
-          newKycStatuses.push(kycStatus);
-        }
-        setTitles(newTitles);
-        setKycStatuses(newKycStatuses);
-      };
-      fetchTitlesAndKycStatuses();
-    }
-  }, [data]);
-
-  useEffect(() => {
-    if (data) {
-      const fetchTitlesAndPrivateStatuses = async () => {
-        const newTitles = [];
-        const newPrivateStatuses = [];
-        for (const address of data) {
-          const contract = new ethers.Contract(address, votingABI, provider);
-          const title = await contract.title();
-          const kycStatus = await contract.isPrivate();
-          newTitles.push(title);
-          newPrivateStatuses.push(kycStatus);
-        }
-        setTitles(newTitles);
-        setPrivateStatuses(newPrivateStatuses);
-        setLoading(false);
-      };
-      fetchTitlesAndPrivateStatuses();
-    }
-  }, [data]);
-
-  useEffect(() => {
-    const newGradients = filteredList.map(() => getRandomGradient());
+    const newGradients = data.map(() => getRandomGradient());
     setGradients(newGradients);
-  }, [filteredList]);
+  }, [data]);
 
   useEffect(() => {
     if (isLoading) {
@@ -301,20 +223,6 @@ const VotingList = () => {
       );
     }
 
-    if (userAddress === chairPerson) {
-      return (
-        <>
-          <VotingSettings
-            votingAddress={data[selectedVoting]}
-            isPrivate={isPrivate}
-          />
-          <TimeRemaining />
-          <br />
-          <Alert message="Chair person can't vote." type="warning" showIcon />
-        </>
-      );
-    }
-
     if (data?.[selectedVoting] && voters?.voted) {
       return (
         <>
@@ -331,33 +239,7 @@ const VotingList = () => {
       );
     }
 
-    if (isPrivate && !isWhitelisted) {
-      return (
-        <>
-          <TimeRemaining />
-          <br />
-          <Alert
-            message="You are not whitelisted"
-            description="You can't vote here, ask chair person to add you."
-            type="warning"
-            showIcon
-          />
-          {isContractKYC && !isUserKYC && (
-            <>
-              <br />
-              <Alert
-                message="You are not identified"
-                description="Verify your identity via KYC to get more features."
-                type="warning"
-                showIcon
-              />
-            </>
-          )}
-        </>
-      );
-    }
-
-    if (isContractKYC && !isUserKYC) {
+    if (!isUserKYC) {
       return (
         <>
           <TimeRemaining />
@@ -405,84 +287,64 @@ const VotingList = () => {
   return (
     <>
       <Title level={3} style={{ margin: "10px auto", textAlign: "center" }}>
-        Votings
+        Token Weighted Votings
       </Title>
-      <Input
-        placeholder="Search by title or address"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        allowClear
-      />
-      <Spin spinning={loading}>
-        <Row gutter={[16, 16]} style={{ marginTop: "40px" }}>
-          {filteredList.map((item, index) => (
-            <Col xs={24} sm={24} md={12} lg={12} xl={8} key={item.index}>
-              <Card hoverable>
-                <div
-                  style={{
-                    width: "100%",
-                    height: "200px",
-                    borderRadius: "10px",
-                    background: gradients[index],
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexDirection: "column",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => showModal(item.index)}
-                >
-                  <Typography.Title level={4} style={{ color: "white" }}>
-                    {item.title}
-                  </Typography.Title>
-                </div>
-                <Card.Meta
-                  style={{ textAlign: "center", padding: "10px" }}
-                  description={`Voting contract at address: ${
-                    data[item.index]
-                  }`}
+      <Divider />
+      <Row gutter={[16, 16]} style={{ marginTop: "40px" }}>
+        {data.map((item, index) => (
+          <Col xs={24} sm={24} md={12} lg={12} xl={8} key={item.index}>
+            <Card hoverable>
+              <div
+                style={{
+                  width: "100%",
+                  height: "200px",
+                  borderRadius: "10px",
+                  background: gradients[index],
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexDirection: "column",
+                  cursor: "pointer",
+                }}
+                onClick={() => showModal(item.index)}
+              >
+                <Typography.Title level={4} style={{ color: "white" }}>
+                  {item.title}
+                </Typography.Title>
+              </div>
+              <Card.Meta
+                style={{ textAlign: "center", padding: "10px" }}
+                description={`Voting contract at address: ${data[item.index]}`}
+              />
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-evenly",
+                  marginTop: "10px",
+                }}
+              >
+                <Switch
+                  size="small"
+                  checkedChildren="KYC"
+                  disabled
+                  defaultChecked
                 />
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-evenly",
-                    marginTop: "10px",
-                  }}
-                >
-                  {kycStatuses[item.index] && (
-                    <Switch
-                      size="small"
-                      checkedChildren="KYC"
-                      disabled
-                      defaultChecked
-                    />
-                  )}
-                  {privateStatuses[item.index] && (
-                    <Switch
-                      size="small"
-                      checkedChildren="PRIVATE"
-                      disabled
-                      defaultChecked
-                    />
-                  )}
-                </div>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      </Spin>
+              </div>
+            </Card>
+          </Col>
+        ))}
+      </Row>
 
       <Modal
-        title={`Voting: ${titles[selectedVoting]}`}
+        title={`Voting: ${data[selectedVoting]?.title}`}
         open={isModalVisible}
         onCancel={handleCancel}
         footer={null}
       >
-        {isUserModerator &&
-          (userAddress !== chairPerson || currentTimestamp >= endTime) && (
-            <VotingModeration votingAddress={data?.[selectedVoting]} />
-          )}
+        {isUserModerator && (
+          <VotingModeration votingAddress={data?.[selectedVoting]} />
+        )}
         {renderModalContent()}
         <Divider />
         <div
@@ -502,17 +364,9 @@ const VotingList = () => {
             </div>
           ))}
         </div>
-
-        <Row justify="center" style={{ marginTop: "20px" }}>
-          <Col>
-            <Text type="secondary" style={{ textAlign: "center" }}>
-              Chair person: {chairPerson}
-            </Text>
-          </Col>
-        </Row>
       </Modal>
     </>
   );
 };
 
-export default VotingList;
+export default TWVotingCards;

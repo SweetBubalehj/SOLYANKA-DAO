@@ -4,7 +4,8 @@ import { ConnectButton, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { WagmiConfig } from "wagmi";
 import CreateVotingForm from "./components/CreateVotingForm";
 import CreateIdentityForm from "./components/СreateIdentity";
-import VotingList from "./components/VotingList";
+import VotingCards from "./components/VotingCards";
+import TWVotingCards from "./components/TWVotingCards";
 import { getDefaultWallets } from "@rainbow-me/rainbowkit";
 import { bscTestnet } from "wagmi/chains";
 import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
@@ -17,7 +18,8 @@ import IdentityInfoForm from "./components/IdentityInfo";
 import StakingCards from "./components/StakingCards";
 import AdminButtons from "./components/AdminButton";
 import ModeratorButtons from "./components/ModeratorButton";
-import {Address} from "./contracts/tokenContract"
+import { Address } from "./contracts/tokenContract";
+import CreateTWVotingForm from "./components/CreateTWVotinForm";
 
 const { Header, Content, Footer } = Layout;
 const { Title, Paragraph } = Typography;
@@ -86,11 +88,20 @@ const App = () => {
         </WagmiConfig>
 
         <WagmiConfig client={wagmiClient}>
-          <CreateIdentityForm />
+          <CreateTWVotingForm />
+        </WagmiConfig>
+
+
+        <WagmiConfig client={wagmiClient}>
+          <TWVotingCards />
         </WagmiConfig>
 
         <WagmiConfig client={wagmiClient}>
-          <VotingList />
+          <VotingCards />
+        </WagmiConfig>
+        
+        <WagmiConfig client={wagmiClient}>
+          <CreateIdentityForm />
         </WagmiConfig>
       </>
     ),
