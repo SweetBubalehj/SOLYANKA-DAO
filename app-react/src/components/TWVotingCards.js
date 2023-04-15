@@ -20,6 +20,7 @@ import {
   notification,
   Divider,
   Spin,
+  InputNumber,
 } from "antd";
 import {
   Address as factoryAddress,
@@ -119,11 +120,20 @@ const TWVotingCards = () => {
     functionName: "getProposalsVotes",
   });
 
+  const { data: allowanceInfo } = useContractRead({
+    address: tokenAddress,
+    abi: tokenABI,
+    functionName: "allowance",
+    args: [userAddress, TWdata?.[selectedVoting]],
+  });
+
+  console.log(Number(allowanceInfo) > voteWeight + 10000);
+
   const { config: voteConfig } = usePrepareContractWrite({
     address: TWdata?.[selectedVoting],
     abi: TWvotingABI,
     functionName: "vote",
-    args: [1, selectedProposal],
+    args: [toWei(voteWeight), selectedProposal],
   });
   const { isLoading, isSuccess, write: vote } = useContractWrite(voteConfig);
 
@@ -323,23 +333,52 @@ const TWVotingCards = () => {
               </Select.Option>
             ))}
         </Select>
-        <Button
-          key="submit"
-          type="primary"
-          onClick={() => approve?.()}
-          style={{ marginTop: "16px" }}
-        >
-          Approve
-        </Button>
-        
-        <Button
-          key="submit"
-          type="primary"
-          onClick={() => vote?.()}
-          style={{ marginTop: "16px" }}
-        >
-          Vote
-        </Button>
+        <br />
+        <br />
+        <Row justify="center" align="middle" gutter={[16, 16]}>
+          <Col xs={13} sm={8}>
+            <Text>Token weight amount:</Text>
+          </Col>
+          <Col xs={11} sm={5}>
+            <InputNumber
+              style={{ width: "100%" }}
+              min={1}
+              max={10000}
+              value={voteWeight}
+              onChange={setVoteWeight}
+            />
+          </Col>
+          <Col xs={24} sm={5}>
+            <Button
+              key="submit"
+              type="primary"
+              onClick={() => approve?.()}
+              style={{ width: "100%" }}
+            >
+              Approve
+            </Button>
+          </Col>
+          <Col xs={24} sm={5}>
+            <Button
+              key="submit"
+              type="primary"
+              disabled={voteWeight > fromWei(allowanceInfo)}
+              onClick={() => vote?.()}
+              style={{ width: "100%" }}
+            >
+              Vote
+            </Button>
+          </Col>
+          {voteWeight > fromWei(allowanceInfo) && (
+            <Col xs={24} style={{ marginTop: "16px" }}>
+              <Alert
+                description="Vote weight is greater than your allowance. Please approve tokens."
+                type="error"
+                showIcon
+              />
+            </Col>
+          )}
+        </Row>
       </>
     );
   };
