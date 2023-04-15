@@ -1,4 +1,4 @@
-import { Layout, Typography, Menu, Col, Row } from "antd";
+import { Layout, Typography, Menu, Col, Row,Input, QRCode, Space } from "antd";
 import "@rainbow-me/rainbowkit/styles.css";
 import { ConnectButton, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { WagmiConfig } from "wagmi";
@@ -46,17 +46,21 @@ const wagmiClient = createClient({
 
 const App = () => {
   const [contentKey, setContentKey] = useState("welcome");
+  const [text, setText] = useState('https://1000.menu/cooking/13122-myasnaya-sbornaya-solyanka-s-kartoshkoj');
 
   const menuContent = {
     welcome: (
-      <>
-        <Title level={1}>Welcome to SOLYANKA DAO</Title>
-        <Paragraph>
-          This is the home page of SOLYANKA DAO. Click on the "Votings" menu
+      <div style={{display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "center"}}>
+        <Title code level={3}>function Welcome_To_SolyankaDAO(attention) public view returns (respect)</Title>
+        <Paragraph style={{fontSize: "14pt"}} code level={2}>
+          print("This is the home page of SOLYANKA DAO. Click on the "Votings" menu
           item to access the main features. Click "Profile" to go to your
-          profile.
+          profile.");
         </Paragraph>
-      </>
+        <Space style={{height: "100%"}}  direction="vertical" align="center">
+        <QRCode size={430} icon="https://genshin-info.ru/upload/resize_cache/iblock/1e7/256_256_1d7a58ff99b324185ccb5ad5dfbdb5e85/Strannaya-solyanka-Arkhonta.png"  value={text || '-'} />
+        </Space>
+      </div>
     ),
     votings: (
       <>
