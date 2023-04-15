@@ -74,17 +74,31 @@ describe("Voting Factory", async function() {
     VotingFactoryContract = await VotingFactory.deploy(VotingFactoryArgs);
   });
 
+  it("Check SBT address", async () => {
+    expect(await VotingFactoryContract.getSBTAddress()).to.equals(SBTContract.address);
+  });
 
-  // it("Check create voting", async () => {
-  //   argVoting = ["examp", ["ex1", "ex2"], 60, true, false];
-  //   check = await VotingFactoryContract.createVoting(
-  //     argVoting[0],
-  //     argVoting[1],
-  //     argVoting[2],
-  //     argVoting[3],
-  //     argVoting[4],
-  //   );
-  //   //console.log(check);
-  //   expect(check).to.equals();
-  // });
+
+  it("Check Deployed Votings", async () => {
+    argVoting = ["examp", ["ex1", "ex2"], 60, true, false];
+    await VotingFactoryContract.createVoting(
+      argVoting[0],
+      argVoting[1],
+      argVoting[2],
+      argVoting[3],
+      argVoting[4],
+    );
+    expect(await VotingFactoryContract.getDeployedVotings()).to.be.lengthOf(1);
+  });
+
+  it("Check Deployed Token", async () => {
+    argVoting = ["examp", ["ex1", "ex2"], 60, "0x0000000000000000000000000000000000000001"];
+    await VotingFactoryContract.createTokenWeightedVoting(
+      argVoting[0],
+      argVoting[1],
+      argVoting[2],
+      argVoting[3],
+    );
+    expect(await VotingFactoryContract.getDeployedTokenWeightedVotings()).to.be.lengthOf(1);
+  });
 });
