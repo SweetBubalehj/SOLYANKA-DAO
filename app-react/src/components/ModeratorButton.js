@@ -7,7 +7,7 @@ import {
 } from "wagmi";
 import { Address, ABI } from "../contracts/sbtContract";
 import useGetIsModerator from "../utils/isModerator";
-import useGetIsAdmin from "../utils/isAdmin";
+import useCheckIdentity from "../utils/isIdentified";
 import {
   Card,
   Typography,
@@ -24,6 +24,7 @@ const { Title, Text } = Typography;
 const ModeratorButtons = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [componentDisabled, setComponentDisabled] = useState(true);
+  const isVerified = useCheckIdentity();
   //Contract part
   const { address } = useAccount();
 
@@ -89,40 +90,42 @@ const ModeratorButtons = () => {
   const isModerator = useGetIsModerator();
   console.log(isModerator);
   //
-  return (
-    <>
-      {isModerator && (
-        <Card title="">
-          <Modal
-            title="Set KYC status for a soul"
-            open={isModalOpen}
-            onOk={handleOk}
-            onShow={showModal}
-            onCancel={handleCancel}
-          >
-            <Form>
-              <Form.Item label="Soul address" name="addrSoul">
-                <Input
-                  value={addrSoul}
-                  onChange={(e) => setAddrSoul(e.target.value)}
-                />
-              </Form.Item>
+  if (isVerified) {
+    return (
+      <>
+        {isModerator && (
+          <Card title="">
+            <Modal
+              title="Set KYC status for a soul"
+              open={isModalOpen}
+              onOk={handleOk}
+              onShow={showModal}
+              onCancel={handleCancel}
+            >
+              <Form>
+                <Form.Item label="Soul address" name="addrSoul">
+                  <Input
+                    value={addrSoul}
+                    onChange={(e) => setAddrSoul(e.target.value)}
+                  />
+                </Form.Item>
 
-              <Form.Item label="KYC?" name="kyc">
-                <Checkbox
-                  checked={!componentDisabled}
-                  onChange={(e) => setComponentDisabled(!e.target.checked)}
-                />
-              </Form.Item>
-            </Form>
-          </Modal>
-          <Button type="primary" onClick={showModal}>
-            Moderator options
-          </Button>
-        </Card>
-      )}
-    </>
-  );
+                <Form.Item label="KYC?" name="kyc">
+                  <Checkbox
+                    checked={!componentDisabled}
+                    onChange={(e) => setComponentDisabled(!e.target.checked)}
+                  />
+                </Form.Item>
+              </Form>
+            </Modal>
+            <Button type="primary" onClick={showModal}>
+              Moderator options
+            </Button>
+          </Card>
+        )}
+      </>
+    );
+  }
 };
 
 export default ModeratorButtons;
