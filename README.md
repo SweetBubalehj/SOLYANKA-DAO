@@ -86,7 +86,7 @@ npm start
 
 #### Frameworks
 
-- `Reqct`
+- `React`
 - `Ant Design`
 
 ## Использование
