@@ -79,8 +79,14 @@ const App = () => {
         </Title>
         <Paragraph style={{ fontSize: "14pt" }} code level={2}>
           console.log("This is the home page of SOLYANKA DAO. Click on the
-          "Votings" menu item to access the main features. Click "Profile" to go
-          to your profile.");
+          "Votings" menu item to access the main features.");
+        </Paragraph>
+        <Paragraph style={{ fontSize: "14pt" }} code level={2}>
+          console.log("Start earning our token by clicking on the "Staking"
+          button. Lock your tokens for a set period and receive rewards.");
+        </Paragraph>
+        <Paragraph style={{ fontSize: "16pt" }} code level={2}>
+          console.log("Click "Profile" to go to your profile.");
         </Paragraph>
         <Space style={{ height: "100%" }} direction="vertical" align="center">
           <QRCode
@@ -104,7 +110,7 @@ const App = () => {
         <WagmiConfig client={wagmiClient}>
           <TWVotingCards />
         </WagmiConfig>
-        
+
         <WagmiConfig client={wagmiClient}>
           <VotingCards />
         </WagmiConfig>
