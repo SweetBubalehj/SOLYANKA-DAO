@@ -1,10 +1,7 @@
 # SOLYANKA DAO 
 
 [SOLYANKA DAO](https://solyanka-dao.vercel.app/) - это децентрализованное автономное сообщество (DAO), предназначенное для проведения голосования в blockchain. Смарт-контракт написал на Hardhat, а фронт-енд написан на React с использованием библиотеки Ant Design для интерфейса и Wagmi/Ethers/RainbowKit для работы с blockchain.
-> - SBT: 0xF840C81dB1958227c4021143Dd7E949c881C3600
-> - ERC20: 0xC97F0A883BcBf2338bAc5db23025ec00E568c95a
-> - Staking: 0x844F750EC4A4Af759E68713E8c776bd8dEB778f3
-> - Factory: 0xa7187beb237cf6b0a2D50714C948b89e413e0cE4
+
 
 ## Особенности
 
@@ -95,3 +92,8 @@ npm start
 3. Создайте идентификатор, заполнив форму "Create Identity".
 4. Просмотрите список активных голосований в разделе "Voting List".
 5. Управляйте голосованиями, создавая их, голосуя, изменяя их параметры и наблюдая за статусом транзакций.
+
+> - SBT: 0xF840C81dB1958227c4021143Dd7E949c881C3600
+> - ERC20: 0xC97F0A883BcBf2338bAc5db23025ec00E568c95a
+> - Staking: 0x844F750EC4A4Af759E68713E8c776bd8dEB778f3
+> - Factory: 0xa7187beb237cf6b0a2D50714C948b89e413e0cE4
