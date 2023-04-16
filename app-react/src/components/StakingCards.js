@@ -27,9 +27,9 @@ import {
   ABI as tokenABI,
 } from "../contracts/tokenContract"; //<- ипользуй этот аби
 import useCheckKYC from "../utils/isKYC";
-
 import { ethers } from "ethers";
 import useCheckIdentity from "../utils/isIdentified";
+import { ClockCircleOutlined } from "@ant-design/icons";
 
 const { Text } = Typography;
 
@@ -101,7 +101,6 @@ const StakingCards = () => {
     args: [userAddress],
   });
 
-
   function myBalance() {
     let balance = 0;
     balance = _balance;
@@ -130,6 +129,43 @@ const StakingCards = () => {
     } catch (e) {
       console.log(e.message);
     }
+  }
+  const formatDuration = (seconds) => {
+    if (seconds < 60) {
+      return "~1m";
+    }
+
+    const weeks = Math.floor(seconds / 604800);
+    seconds %= 604800;
+    const days = Math.floor(seconds / 86400);
+    seconds %= 86400;
+    const hours = Math.floor(seconds / 3600);
+    seconds %= 3600;
+    const minutes = Math.floor(seconds / 60);
+    seconds %= 60;
+
+    const formattedDuration = [
+      weeks > 0 && `${weeks}w`,
+      days > 0 && `${days}d`,
+      hours > 0 && `${hours}h`,
+      minutes > 0 && `${minutes}m`,
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+    return formattedDuration;
+  };
+
+  function TimeRemaining() {
+    return (
+      <Alert
+        message={`End time remaining: ${formatDuration(
+          stakeInfo?.endTS - currentTimestamp
+        )}.`}
+        showIcon
+        icon={<ClockCircleOutlined />}
+      />
+    );
   }
 
   const { config: stakeConfig } = usePrepareContractWrite({
@@ -524,7 +560,11 @@ const StakingCards = () => {
               Cancel
             </Button>,
             <Button
-              disabled={stakeInfo?.endTS < currentTimestamp}
+              disabled={
+                addressStaked == undefined ||
+                addressStaked == false ||
+                stakeInfo?.endTS > currentTimestamp
+              }
               type="primary"
               key="GetReward"
               onClick={handleReward}
@@ -534,7 +574,7 @@ const StakingCards = () => {
           ]}
           onCancel={handleCancel}
         >
-          {stakeInfo?.endTS == undefined ? (
+          {addressStaked == undefined || addressStaked == false ? (
             <Alert
               message="Not participated"
               description={"You are not participating in staking."}
@@ -543,13 +583,23 @@ const StakingCards = () => {
             />
           ) : (
             stakeInfo?.endTS > currentTimestamp && (
-              <Alert
-                message="Not yet time"
-                description={"Staking time is not up."}
-                type="warning"
-                showIcon
-              />
+              <>
+                <TimeRemaining />
+                <br></br>
+                <Alert
+                  message="Not yet time"
+                  description={"Staking time is not up."}
+                  type="warning"
+                  showIcon
+                />
+              </>
             )
+          )}
+          {addressStaked != undefined && addressStaked == true && (
+            <h3>
+              Staked abount: {parseFloat(fromWei(stakeInfo?.amount)).toFixed(2)}{" "}
+              SLK
+            </h3>
           )}
         </Modal>
         <Modal
