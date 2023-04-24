@@ -49,7 +49,11 @@ const VotingCards = () => {
   const [gradients, setGradients] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const provider = window.ethereum
+    ? new ethers.providers.Web3Provider(window.ethereum)
+    : new ethers.providers.JsonRpcProvider(
+        "https://data-seed-prebsc-1-s1.binance.org:8545/"
+      );
   const isUserVerified = useCheckIdentity();
   const isUserKYC = useCheckKYC();
   const isUserModerator = useGetIsModerator();

@@ -52,7 +52,11 @@ const StakingCards = () => {
 
   const isVerified = useCheckIdentity();
 
-  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const provider = window.ethereum
+    ? new ethers.providers.Web3Provider(window.ethereum)
+    : new ethers.providers.JsonRpcProvider(
+        "https://data-seed-prebsc-1-s1.binance.org:8545/"
+      );
 
   const getBlockTimestamp = async () => {
     const block = await provider.getBlock();
