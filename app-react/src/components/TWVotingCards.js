@@ -310,7 +310,7 @@ const TWVotingCards = () => {
           <br />
           <Alert
             message={`You have already voted. Your choice is: ${
-              proposalNames[voters?.choice]
+              proposalNames?.[voters?.choice]
             }`}
             type="warning"
             showIcon
@@ -346,7 +346,7 @@ const TWVotingCards = () => {
           onChange={(value) => setSelectedProposal(value)}
         >
           {proposalNames &&
-            proposalNames.map((proposalName, index) => (
+            proposalNames?.map((proposalName, index) => (
               <Select.Option key={index} value={index}>
                 {proposalName}
               </Select.Option>
